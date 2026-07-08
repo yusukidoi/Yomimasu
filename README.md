@@ -54,6 +54,17 @@ Email/password auth is handled by Supabase.
 
 Protected routes: `/app`, `/admin`
 
+## Seed sample texts
+
+```bash
+pnpm db:seed
+```
+
+Seeds two free published texts:
+
+- `/read/n5-morning-routine`
+- `/read/n4-spring-picnic`
+
 ## Database
 
 ```bash
@@ -77,6 +88,6 @@ See `packages/db/README.md` for table overview.
 
 ## Next steps
 
-1. Seed 2 free sample graded texts
-2. Reader page with clickable tokens
-3. Admin panel for texts
+1. Reader page with clickable tokens + furigana
+2. Admin panel for texts
+3. Vocabulary save / progress tracking

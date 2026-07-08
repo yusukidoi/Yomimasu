@@ -104,6 +104,37 @@ export default function Home() {
             </article>
           ))}
         </section>
+
+        <section id="library" className="mt-20">
+          <h2 className="font-display text-3xl font-semibold text-ink">Free texts</h2>
+          <p className="mt-2 text-ink-muted">
+            Start reading immediately — no account needed for these two.
+          </p>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <Link
+              href="/read/n5-morning-routine"
+              className="rounded-2xl border border-line bg-white/80 p-5 transition hover:border-sakura/40"
+            >
+              <p className="text-sm font-medium text-sakura-deep">N5 · Daily Life</p>
+              <h3 className="mt-2 text-xl font-semibold text-ink">N5 Morning Routine</h3>
+              <p className="mt-2 text-sm text-ink-muted">
+                A short N5 story about waking up and getting ready for the day.
+              </p>
+              <p className="mt-4 text-sm font-medium text-ink">Read now →</p>
+            </Link>
+            <Link
+              href="/read/n4-spring-picnic"
+              className="rounded-2xl border border-line bg-white/80 p-5 transition hover:border-sakura/40"
+            >
+              <p className="text-sm font-medium text-sakura-deep">N4 · Stories</p>
+              <h3 className="mt-2 text-xl font-semibold text-ink">N4 Spring Picnic</h3>
+              <p className="mt-2 text-sm text-ink-muted">
+                An N4 picnic story about going to the park with friends.
+              </p>
+              <p className="mt-4 text-sm font-medium text-ink">Read now →</p>
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );

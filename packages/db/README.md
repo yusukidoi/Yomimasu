@@ -34,7 +34,15 @@ pnpm db:push       # push schema without migration files
 | `reading_sessions` | Per-text reading progress |
 | `ai_explanations` | Cached OpenAI sentence explanations |
 
+## Seed sample texts
+
+```bash
+pnpm db:seed
+```
+
+Upserts the two free MVP texts into `texts`.
+
 ## Notes
 
-- Do not run migrations until a Postgres instance is available.
-- Auth wiring (Supabase client in `apps/web`) is a later step.
+- Prefer Session/Transaction pooler `DATABASE_URL` from Supabase Connect → Direct.
+- Profile creation happens from the web app on login (`ensureProfile`).
