@@ -8,5 +8,9 @@ export async function GET() {
     timestamp: new Date().toISOString(),
   };
 
-  return NextResponse.json({ ...payload, app: APP_NAME });
+  return NextResponse.json({
+    ...payload,
+    app: APP_NAME,
+    databaseConfigured: Boolean(process.env.DATABASE_URL),
+  });
 }
