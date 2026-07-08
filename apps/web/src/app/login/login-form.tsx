@@ -7,6 +7,16 @@ import { createClient } from "@/lib/supabase/client";
 
 type Mode = "login" | "signup";
 
+async function ensureProfileOnServer() {
+  const response = await fetch("/api/profile/ensure", { method: "POST" });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
+    throw new Error(body?.error ?? "Could not create profile");
+  }
+}
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,6 +49,18 @@ export function LoginForm() {
         return;
       }
 
+      try {
+        await ensureProfileOnServer();
+      } catch (profileError) {
+        setError(
+          profileError instanceof Error
+            ? profileError.message
+            : "Signed in, but profile setup failed",
+        );
+        setLoading(false);
+        return;
+      }
+
       router.push(nextPath);
       router.refresh();
       return;
@@ -56,6 +78,18 @@ export function LoginForm() {
     }
 
     if (data.session) {
+      try {
+        await ensureProfileOnServer();
+      } catch (profileError) {
+        setError(
+          profileError instanceof Error
+            ? profileError.message
+            : "Account created, but profile setup failed",
+        );
+        setLoading(false);
+        return;
+      }
+
       router.push(nextPath);
       router.refresh();
       return;

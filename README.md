@@ -77,7 +77,6 @@ See `packages/db/README.md` for table overview.
 
 ## Next steps
 
-1. Wire profile creation after signup
-2. Seed sample graded texts
-3. Reader page with clickable tokens
-4. Admin panel for texts
+1. Seed 2 free sample graded texts
+2. Reader page with clickable tokens
+3. Admin panel for texts

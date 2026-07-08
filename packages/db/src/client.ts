@@ -4,6 +4,10 @@ import * as schema from "./schema";
 
 export type Database = ReturnType<typeof createDb>;
 
+function normalizeDatabaseUrl(connectionString: string) {
+  return connectionString.replace(/^["']|["']$/g, "");
+}
+
 export function createDb(connectionString = process.env.DATABASE_URL) {
   if (!connectionString) {
     throw new Error(
@@ -11,6 +15,8 @@ export function createDb(connectionString = process.env.DATABASE_URL) {
     );
   }
 
-  const client = postgres(connectionString, { prepare: false });
+  const client = postgres(normalizeDatabaseUrl(connectionString), {
+    prepare: false,
+  });
   return drizzle(client, { schema });
 }
