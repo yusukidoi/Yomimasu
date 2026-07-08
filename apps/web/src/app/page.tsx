@@ -31,6 +31,12 @@ export default function Home() {
             Log in
           </Link>
           <Link
+            href="/app"
+            className="rounded-full border border-line bg-white/70 px-4 py-2 font-medium text-ink transition hover:bg-white"
+          >
+            Dashboard
+          </Link>
+          <Link
             href="/read/n5-morning-routine"
             className="rounded-full bg-sakura-deep px-4 py-2 font-medium text-white transition hover:bg-[#b34d58]"
           >

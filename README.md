@@ -43,9 +43,16 @@ Fill `DATABASE_URL` (and later Supabase keys) in those env files.
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+## Authentication
 
-Health check API: [http://localhost:3000/api/health](http://localhost:3000/api/health)
+Email/password auth is handled by Supabase.
+
+1. Open [http://localhost:3000/login](http://localhost:3000/login)
+2. Sign up with an email + password
+3. For local MVP, disable email confirmation in Supabase:
+   - Authentication → Providers → Email → turn off **Confirm email**
+
+Protected routes: `/app`, `/admin`
 
 ## Database
 
@@ -70,7 +77,7 @@ See `packages/db/README.md` for table overview.
 
 ## Next steps
 
-1. Supabase Auth wiring in `apps/web`
-2. Apply migrations against a live Postgres
-3. Reader page with tokenization
+1. Wire profile creation after signup
+2. Seed sample graded texts
+3. Reader page with clickable tokens
 4. Admin panel for texts
