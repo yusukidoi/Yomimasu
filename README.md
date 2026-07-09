@@ -94,9 +94,17 @@ See `packages/db/README.md` for table overview.
 | `pnpm typecheck` | Type-check all packages |
 | `pnpm db:*` | Database generate / migrate / push / studio |
 
+## Japanese processing
+
+```bash
+pnpm --filter @yomimasu/japanese tokenize:demo
+```
+
+Kuromoji-based tokenizer lives in `packages/japanese` (Milestone 1).
+
 ## Next steps
 
-1. Wire landing/dashboard charts to `reading_sessions` + `user_vocabulary`
-2. Admin: create/edit texts + token correction UI
-3. Sudachi/JMdict automatic tokenization (replace demo dictionary)
+1. Milestone 1: persist Kuromoji tokens to Supabase + process arbitrary text
+2. Wire landing/dashboard charts to `reading_sessions` + `user_vocabulary`
+3. Admin: create/edit texts + token correction UI
 4. AI sentence explain (cached)

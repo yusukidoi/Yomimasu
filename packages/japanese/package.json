@@ -1,0 +1,22 @@
+{
+  "name": "@yomimasu/japanese",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "tokenize:demo": "tsx src/cli-demo.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@patdx/kuromoji": "^1.0.4",
+    "@yomimasu/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
