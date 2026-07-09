@@ -1,4 +1,4 @@
-import { ensureProfile } from "@yomimasu/db";
+import { ensureProfile, listUserVocabulary } from "@yomimasu/db";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
@@ -14,10 +14,15 @@ export default async function DashboardPage() {
     redirect("/login?next=/app");
   }
 
-  const profile = await ensureProfile(getDb(), {
+  const db = getDb();
+  const profile = await ensureProfile(db, {
     id: user.id,
     email: user.email,
   });
+
+  const vocabulary = await listUserVocabulary(db, user.id, 8);
+  const savedCount = vocabulary.filter((item) => item.status === "saved").length;
+  const knownCount = vocabulary.filter((item) => item.status === "known").length;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-16">
@@ -27,10 +32,10 @@ export default async function DashboardPage() {
             Dashboard
           </p>
           <h1 className="font-display mt-3 text-4xl font-semibold text-ink">
-            Coming soon
+            Your progress
           </h1>
           <p className="mt-4 text-ink-muted">
-            Library, vocabulary, and progress tabs will live here.
+            Save words while reading, then review them here.
           </p>
         </div>
         <form action="/auth/signout" method="post">
@@ -43,42 +48,61 @@ export default async function DashboardPage() {
         </form>
       </div>
 
-      <section className="mt-10 rounded-2xl border border-line bg-white/80 p-5">
-        <h2 className="text-sm font-medium text-ink">Profile</h2>
-        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-ink-muted">Email</dt>
-            <dd className="mt-1 text-ink">{profile.email ?? user.email}</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted">JLPT level</dt>
-            <dd className="mt-1 text-ink">{profile.jlptLevel}</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted">Reading streak</dt>
-            <dd className="mt-1 text-ink">{profile.readingStreakDays} days</dd>
-          </div>
-          <div>
-            <dt className="text-ink-muted">User id</dt>
-            <dd className="mt-1 break-all font-mono text-xs text-ink-muted">
-              {profile.id}
-            </dd>
-          </div>
-        </dl>
+      <section className="mt-10 grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-line bg-white/80 p-5">
+          <p className="text-sm text-ink-muted">Saved words</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">{savedCount}</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-white/80 p-5">
+          <p className="text-sm text-ink-muted">Known words</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">{knownCount}</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-white/80 p-5">
+          <p className="text-sm text-ink-muted">Reading streak</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">
+            {profile.readingStreakDays} days
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-line bg-white/80 p-5">
+        <h2 className="text-sm font-medium text-ink">Recent vocabulary</h2>
+        {vocabulary.length === 0 ? (
+          <p className="mt-4 text-sm text-ink-muted">
+            No saved words yet. Open a text and click a word to save it.
+          </p>
+        ) : (
+          <ul className="mt-4 divide-y divide-line">
+            {vocabulary.map((item) => (
+              <li key={item.id} className="flex items-center justify-between py-3 text-sm">
+                <div>
+                  <p className="font-medium text-ink">{item.surface}</p>
+                  <p className="text-ink-muted">
+                    {item.reading ? `${item.reading} · ` : ""}
+                    {item.meaning ?? "—"}
+                  </p>
+                </div>
+                <span className="rounded-full bg-paper px-3 py-1 text-xs capitalize text-ink-muted">
+                  {item.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <div className="mt-8 flex flex-wrap gap-3 text-sm">
         <Link
-          href="/read/n5-morning-routine"
+          href="/read/n4-spring-picnic"
           className="rounded-full bg-sakura-deep px-5 py-2.5 font-medium text-white transition hover:bg-[#b34d58]"
         >
-          Start Reading
+          Try Spring Picnic
         </Link>
         <Link
-          href="/"
+          href="/read/n5-morning-routine"
           className="rounded-full border border-line bg-white/80 px-5 py-2.5 text-ink-muted transition hover:text-ink"
         >
-          Home
+          N5 Morning Routine
         </Link>
       </div>
     </main>

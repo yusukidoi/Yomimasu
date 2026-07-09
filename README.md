@@ -88,6 +88,7 @@ See `packages/db/README.md` for table overview.
 
 ## Next steps
 
-1. Reader page with clickable tokens + furigana
-2. Admin panel for texts
-3. Vocabulary save / progress tracking
+1. Sudachi/JMdict automatic tokenization (replace demo dictionary)
+2. Admin panel for texts + token correction
+3. AI sentence explain (cached)
+4. Progress charts on dashboard
