@@ -5,6 +5,8 @@ import { SiteHeader } from "@/components/site-header";
 import { getDb } from "@/lib/db";
 import { getSessionProfile } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 type ReaderPageProps = {
   params: Promise<{ slug: string }>;
 };

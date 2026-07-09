@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ensureProfile } from "@yomimasu/db";
-import { getDb } from "@/lib/db";
+import { getDb, tryGetDb } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
 export async function getSessionProfile() {
@@ -13,7 +13,12 @@ export async function getSessionProfile() {
     return { user: null, profile: null };
   }
 
-  const profile = await ensureProfile(getDb(), {
+  const db = tryGetDb();
+  if (!db) {
+    return { user, profile: null };
+  }
+
+  const profile = await ensureProfile(db, {
     id: user.id,
     email: user.email,
   });

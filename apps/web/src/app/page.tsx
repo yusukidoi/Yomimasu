@@ -1,11 +1,48 @@
-import { listPublishedTexts } from "@yomimasu/db";
+import { listPublishedTexts, SAMPLE_TEXTS } from "@yomimasu/db";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
-import { getDb } from "@/lib/db";
+import { tryGetDb } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
+
+type FreeTextCard = {
+  id: string;
+  slug: string;
+  title: string;
+  level: string;
+  topic: string | null;
+  summary: string | null;
+  estimatedMinutes: number;
+};
+
+function fallbackFreeTexts(): FreeTextCard[] {
+  return SAMPLE_TEXTS.map((text, index) => ({
+    id: `fallback-${index}`,
+    slug: text.slug,
+    title: text.title,
+    level: text.level,
+    topic: text.topic,
+    summary: text.summary,
+    estimatedMinutes: text.estimatedMinutes,
+  }));
+}
+
+async function loadFreeTexts(): Promise<FreeTextCard[]> {
+  const db = tryGetDb();
+  if (!db) return fallbackFreeTexts();
+
+  try {
+    const allPublished = await listPublishedTexts(db);
+    const freeTexts = allPublished.filter((text) => text.isFree);
+    if (freeTexts.length === 0) return fallbackFreeTexts();
+    return freeTexts;
+  } catch {
+    return fallbackFreeTexts();
+  }
+}
 
 export default async function Home() {
-  const allPublished = await listPublishedTexts(getDb());
-  const freeTexts = allPublished.filter((text) => text.isFree);
+  const freeTexts = await loadFreeTexts();
   const startReadingHref = freeTexts[0]
     ? `/read/${freeTexts[0].slug}`
     : "/read/n5-morning-routine";
@@ -86,7 +123,7 @@ export default async function Home() {
         <section id="library" className="mt-20">
           <h2 className="font-display text-3xl font-semibold text-ink">Free texts</h2>
           <p className="mt-2 text-ink-muted">
-            Loaded from the database — start reading with no account.
+            Start reading with no account.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {freeTexts.map((text) => (
