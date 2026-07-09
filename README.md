@@ -96,7 +96,7 @@ See `packages/db/README.md` for table overview.
 
 ## Next steps
 
-1. Admin: create/edit texts + token correction UI
-2. Sudachi/JMdict automatic tokenization (replace demo dictionary)
-3. AI sentence explain (cached)
-4. Progress charts on dashboard
+1. Wire landing/dashboard charts to `reading_sessions` + `user_vocabulary`
+2. Admin: create/edit texts + token correction UI
+3. Sudachi/JMdict automatic tokenization (replace demo dictionary)
+4. AI sentence explain (cached)

@@ -1,5 +1,8 @@
 import { listPublishedTexts, SAMPLE_TEXTS } from "@yomimasu/db";
 import Link from "next/link";
+import { LandingCategories } from "@/components/landing/landing-categories";
+import { LandingCta } from "@/components/landing/landing-cta";
+import { LandingProgressPreview } from "@/components/landing/landing-progress-preview";
 import { SiteHeader } from "@/components/site-header";
 import { tryGetDb } from "@/lib/db";
 
@@ -145,6 +148,10 @@ export default async function Home() {
             ))}
           </div>
         </section>
+
+        <LandingCategories />
+        <LandingProgressPreview />
+        <LandingCta startReadingHref={startReadingHref} />
       </main>
     </div>
   );
