@@ -11,6 +11,7 @@
     "db:push": "pnpm --filter @yomimasu/db db:push",
     "db:studio": "pnpm --filter @yomimasu/db db:studio",
     "db:seed": "pnpm --filter @yomimasu/db db:seed",
+    "db:process": "pnpm --filter @yomimasu/db db:process",
     "admin:grant": "pnpm --filter @yomimasu/db admin:grant"
   },
   "devDependencies": {

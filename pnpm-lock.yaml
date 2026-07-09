@@ -66,6 +66,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@yomimasu/japanese':
+        specifier: workspace:*
+        version: link:../japanese
       '@yomimasu/shared':
         specifier: workspace:*
         version: link:../shared

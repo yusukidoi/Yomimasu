@@ -97,14 +97,20 @@ See `packages/db/README.md` for table overview.
 ## Japanese processing
 
 ```bash
+# Tokenize only (no DB)
 pnpm --filter @yomimasu/japanese tokenize:demo
+
+# Process + store tokens in Supabase/Postgres
+pnpm db:process -- --all-samples
+pnpm db:process -- --slug live-demo --body "昨日の夜、図書館で日本語の本を読みました。"
 ```
 
-Kuromoji-based tokenizer lives in `packages/japanese` (Milestone 1).
+Kuromoji tokenizer: `packages/japanese`  
+DB persistence: `packages/db` → `processAndStoreTextTokens`
 
 ## Next steps
 
-1. Milestone 1: persist Kuromoji tokens to Supabase + process arbitrary text
+1. Milestone 1: API/admin path to process Flavio-provided text + staging verify
 2. Wire landing/dashboard charts to `reading_sessions` + `user_vocabulary`
 3. Admin: create/edit texts + token correction UI
 4. AI sentence explain (cached)
