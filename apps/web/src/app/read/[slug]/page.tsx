@@ -1,8 +1,9 @@
 import { getTextForReader } from "@yomimasu/db";
 import { notFound } from "next/navigation";
 import { ReaderView } from "@/components/reader/reader-view";
+import { SiteHeader } from "@/components/site-header";
 import { getDb } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth";
 
 type ReaderPageProps = {
   params: Promise<{ slug: string }>;
@@ -16,10 +17,12 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
     notFound();
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getSessionProfile();
 
-  return <ReaderView text={text} isLoggedIn={Boolean(user)} />;
+  return (
+    <>
+      <SiteHeader startReadingHref={`/read/${slug}`} />
+      <ReaderView text={text} isLoggedIn={Boolean(user)} />
+    </>
+  );
 }

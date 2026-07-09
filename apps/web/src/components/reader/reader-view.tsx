@@ -67,17 +67,8 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
   );
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-12">
-      <div className="flex items-center justify-between gap-4">
-        <Link href="/" className="text-sm text-ink-muted hover:text-ink">
-          ← Home
-        </Link>
-        <Link href="/app" className="text-sm text-ink-muted hover:text-ink">
-          Dashboard
-        </Link>
-      </div>
-
-      <header className="mt-10 border-b border-line pb-6">
+    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 pb-12 pt-4">
+      <header className="border-b border-line pb-6">
         <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
           <span className="rounded-full bg-sakura-deep/10 px-3 py-1 font-medium text-sakura-deep">
             {text.level}

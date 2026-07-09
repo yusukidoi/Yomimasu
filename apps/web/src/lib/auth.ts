@@ -3,11 +3,26 @@ import { ensureProfile } from "@yomimasu/db";
 import { getDb } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
-export async function requireUser(nextPath: string) {
+export async function getSessionProfile() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { user: null, profile: null };
+  }
+
+  const profile = await ensureProfile(getDb(), {
+    id: user.id,
+    email: user.email,
+  });
+
+  return { user, profile };
+}
+
+export async function requireUser(nextPath: string) {
+  const { user } = await getSessionProfile();
 
   if (!user) {
     redirect(`/login?next=${encodeURIComponent(nextPath)}`);

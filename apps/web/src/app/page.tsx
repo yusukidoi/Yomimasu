@@ -1,10 +1,14 @@
 import { listPublishedTexts } from "@yomimasu/db";
 import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
 import { getDb } from "@/lib/db";
 
 export default async function Home() {
   const allPublished = await listPublishedTexts(getDb());
   const freeTexts = allPublished.filter((text) => text.isFree);
+  const startReadingHref = freeTexts[0]
+    ? `/read/${freeTexts[0].slug}`
+    : "/read/n5-morning-routine";
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
@@ -17,38 +21,7 @@ export default async function Home() {
         className="pointer-events-none absolute -left-16 bottom-0 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,135,143,0.18),transparent_70%)]"
       />
 
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2">
-          <span className="text-xl text-sakura" aria-hidden>
-            ✿
-          </span>
-          <span className="font-display text-2xl font-semibold tracking-tight text-ink">
-            Yomimasu
-          </span>
-        </div>
-        <nav className="hidden items-center gap-8 text-sm text-ink-muted md:flex">
-          <Link href="#features">Features</Link>
-          <Link href="#library">Library</Link>
-          <Link href="/app">Dashboard</Link>
-        </nav>
-        <div className="flex items-center gap-3 text-sm">
-          <Link href="/login" className="text-ink-muted hover:text-ink">
-            Log in
-          </Link>
-          <Link
-            href="/app"
-            className="rounded-full border border-line bg-white/70 px-4 py-2 font-medium text-ink transition hover:bg-white"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href={freeTexts[0] ? `/read/${freeTexts[0].slug}` : "/read/n5-morning-routine"}
-            className="rounded-full bg-sakura-deep px-4 py-2 font-medium text-white transition hover:bg-[#b34d58]"
-          >
-            Start Reading
-          </Link>
-        </div>
-      </header>
+      <SiteHeader startReadingHref={startReadingHref} />
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pb-20 pt-10">
         <section className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
@@ -65,7 +38,7 @@ export default async function Home() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href={freeTexts[0] ? `/read/${freeTexts[0].slug}` : "/read/n5-morning-routine"}
+                href={startReadingHref}
                 className="rounded-full bg-sakura-deep px-6 py-3 text-sm font-medium text-white transition hover:bg-[#b34d58]"
               >
                 Start Reading →
