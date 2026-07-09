@@ -1,5 +1,6 @@
 import { listAllTexts } from "@yomimasu/db";
 import Link from "next/link";
+import { ProcessTextForm } from "@/components/admin/process-text-form";
 import { getDb } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 
@@ -20,7 +21,7 @@ export default async function AdminPage() {
             Content
           </h1>
           <p className="mt-4 text-ink-muted">
-            Manage graded texts. Token editing and publishing tools come next.
+            Process Japanese with Kuromoji into Postgres, then open the reader.
           </p>
         </div>
         <Link
@@ -40,7 +41,9 @@ export default async function AdminPage() {
         </span>
       </nav>
 
-      <section className="mt-8 overflow-hidden rounded-2xl border border-line bg-white/80">
+      <ProcessTextForm existingSlugs={texts.map((text) => text.slug)} />
+
+      <section className="mt-10 overflow-hidden rounded-2xl border border-line bg-white/80">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-line bg-paper/80 text-ink-muted">
             <tr>
@@ -81,7 +84,9 @@ export default async function AdminPage() {
 
       <p className="mt-6 text-sm text-ink-muted">
         To grant admin access, run{" "}
-        <code className="rounded bg-paper px-1.5 py-0.5">pnpm admin:grant your@email.com</code>{" "}
+        <code className="rounded bg-paper px-1.5 py-0.5">
+          pnpm admin:grant your@email.com
+        </code>{" "}
         after signing up once.
       </p>
     </main>

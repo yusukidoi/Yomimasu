@@ -120,3 +120,79 @@ export async function processTextBySlug(db: Database, slug: string) {
 
   return processAndStoreTextTokens(db, text.id, text.body);
 }
+
+export type UpsertAndProcessTextInput = {
+  slug: string;
+  title: string;
+  body: string;
+  level?: "N5" | "N4" | "N3";
+  isFree?: boolean;
+};
+
+export type UpsertAndProcessTextResult = ProcessTextResult & {
+  slug: string;
+  title: string;
+  created: boolean;
+};
+
+/**
+ * Create or update a text row, then tokenize with Kuromoji into Postgres.
+ * Used by admin API / CLI for live Milestone 1 demos.
+ */
+export async function upsertAndProcessText(
+  db: Database,
+  input: UpsertAndProcessTextInput,
+): Promise<UpsertAndProcessTextResult> {
+  const level = input.level ?? "N5";
+  const isFree = input.isFree ?? true;
+  const existing = await db.query.texts.findFirst({
+    where: eq(texts.slug, input.slug),
+  });
+
+  let textId: string;
+  let created = false;
+
+  if (existing) {
+    const [updated] = await db
+      .update(texts)
+      .set({
+        title: input.title,
+        body: input.body,
+        level,
+        status: "published",
+        isFree,
+        updatedAt: new Date(),
+        publishedAt: existing.publishedAt ?? new Date(),
+        estimatedMinutes: Math.max(1, Math.ceil(input.body.length / 80)),
+      })
+      .where(eq(texts.id, existing.id))
+      .returning();
+    textId = updated.id;
+  } else {
+    const [inserted] = await db
+      .insert(texts)
+      .values({
+        slug: input.slug,
+        title: input.title,
+        body: input.body,
+        level,
+        status: "published",
+        isFree,
+        publishedAt: new Date(),
+        estimatedMinutes: Math.max(1, Math.ceil(input.body.length / 80)),
+        wordCount: 0,
+      })
+      .returning();
+    textId = inserted.id;
+    created = true;
+  }
+
+  const result = await processAndStoreTextTokens(db, textId, input.body);
+
+  return {
+    ...result,
+    slug: input.slug,
+    title: input.title,
+    created,
+  };
+}

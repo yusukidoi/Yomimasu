@@ -10,7 +10,10 @@ export { listAllTexts } from "./admin";
 export {
   processAndStoreTextTokens,
   processTextBySlug,
+  upsertAndProcessText,
   type ProcessTextResult,
+  type UpsertAndProcessTextInput,
+  type UpsertAndProcessTextResult,
 } from "./process-text";
 export { getTextBySlug, getTextForReader, listPublishedTexts } from "./texts";
 export { listUserVocabulary, saveUserVocabulary, type SaveVocabularyInput } from "./vocabulary";
