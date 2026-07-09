@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const CATEGORIES = [
@@ -35,7 +36,16 @@ const CATEGORIES = [
 
 export function LandingCategories() {
   return (
-    <section id="explore" className="mt-24">
+    <section id="explore" className="relative mt-24">
+      <Image
+        src="/decorations/sakura-vertical.png"
+        alt=""
+        aria-hidden
+        width={180}
+        height={240}
+        className="pointer-events-none absolute -left-16 top-24 hidden w-36 -scale-x-100 select-none mix-blend-multiply xl:block"
+      />
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="font-display text-3xl font-semibold text-ink md:text-4xl">
