@@ -1,6 +1,11 @@
+import { listPublishedTexts } from "@yomimasu/db";
 import Link from "next/link";
+import { getDb } from "@/lib/db";
 
-export default function Home() {
+export default async function Home() {
+  const allPublished = await listPublishedTexts(getDb());
+  const freeTexts = allPublished.filter((text) => text.isFree);
+
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div
@@ -37,7 +42,7 @@ export default function Home() {
             Dashboard
           </Link>
           <Link
-            href="/read/n5-morning-routine"
+            href={freeTexts[0] ? `/read/${freeTexts[0].slug}` : "/read/n5-morning-routine"}
             className="rounded-full bg-sakura-deep px-4 py-2 font-medium text-white transition hover:bg-[#b34d58]"
           >
             Start Reading
@@ -60,7 +65,7 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/read/n5-morning-routine"
+                href={freeTexts[0] ? `/read/${freeTexts[0].slug}` : "/read/n5-morning-routine"}
                 className="rounded-full bg-sakura-deep px-6 py-3 text-sm font-medium text-white transition hover:bg-[#b34d58]"
               >
                 Start Reading →
@@ -77,7 +82,7 @@ export default function Home() {
           <div className="animate-fade-up-delay rounded-3xl border border-line bg-white/80 p-6 shadow-[0_24px_60px_rgba(43,38,36,0.08)] backdrop-blur">
             <div className="mb-4 flex items-center justify-between text-sm text-ink-muted">
               <span>Spring Picnic · N4</span>
-              <span>1 / 6</span>
+              <span>Interactive</span>
             </div>
             <p className="font-display text-2xl leading-relaxed text-ink">
               私は<span className="rounded bg-[#fff3bf] px-1">友達</span>と公園へ行きました。
@@ -108,31 +113,26 @@ export default function Home() {
         <section id="library" className="mt-20">
           <h2 className="font-display text-3xl font-semibold text-ink">Free texts</h2>
           <p className="mt-2 text-ink-muted">
-            Start reading immediately — no account needed for these two.
+            Loaded from the database — start reading with no account.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <Link
-              href="/read/n5-morning-routine"
-              className="rounded-2xl border border-line bg-white/80 p-5 transition hover:border-sakura/40"
-            >
-              <p className="text-sm font-medium text-sakura-deep">N5 · Daily Life</p>
-              <h3 className="mt-2 text-xl font-semibold text-ink">N5 Morning Routine</h3>
-              <p className="mt-2 text-sm text-ink-muted">
-                A short N5 story about waking up and getting ready for the day.
-              </p>
-              <p className="mt-4 text-sm font-medium text-ink">Read now →</p>
-            </Link>
-            <Link
-              href="/read/n4-spring-picnic"
-              className="rounded-2xl border border-line bg-white/80 p-5 transition hover:border-sakura/40"
-            >
-              <p className="text-sm font-medium text-sakura-deep">N4 · Stories</p>
-              <h3 className="mt-2 text-xl font-semibold text-ink">N4 Spring Picnic</h3>
-              <p className="mt-2 text-sm text-ink-muted">
-                An N4 picnic story about going to the park with friends.
-              </p>
-              <p className="mt-4 text-sm font-medium text-ink">Read now →</p>
-            </Link>
+            {freeTexts.map((text) => (
+              <Link
+                key={text.id}
+                href={`/read/${text.slug}`}
+                className="rounded-2xl border border-line bg-white/80 p-5 transition hover:border-sakura/40"
+              >
+                <p className="text-sm font-medium text-sakura-deep">
+                  {text.level}
+                  {text.topic ? ` · ${text.topic}` : ""}
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-ink">{text.title}</h3>
+                <p className="mt-2 text-sm text-ink-muted">
+                  {text.summary ?? `${text.estimatedMinutes} min read`}
+                </p>
+                <p className="mt-4 text-sm font-medium text-ink">Read now →</p>
+              </Link>
+            ))}
           </div>
         </section>
       </main>

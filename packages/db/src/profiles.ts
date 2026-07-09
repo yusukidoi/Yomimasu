@@ -43,3 +43,22 @@ export async function ensureProfile(db: Database, input: EnsureProfileInput) {
 
   return created;
 }
+
+export async function getProfileById(db: Database, userId: string) {
+  return db.query.profiles.findFirst({
+    where: eq(profiles.id, userId),
+  });
+}
+
+export async function setProfileAdmin(
+  db: Database,
+  userId: string,
+  isAdmin: boolean,
+) {
+  const [updated] = await db
+    .update(profiles)
+    .set({ isAdmin, updatedAt: new Date() })
+    .where(eq(profiles.id, userId))
+    .returning();
+  return updated;
+}

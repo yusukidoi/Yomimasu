@@ -60,10 +60,18 @@ Protected routes: `/app`, `/admin`
 pnpm db:seed
 ```
 
-Seeds two free published texts:
+Seeds two free published texts with token data.
 
-- `/read/n5-morning-routine`
-- `/read/n4-spring-picnic`
+## Admin access
+
+1. Sign up once in the app (creates a `profiles` row).
+2. Grant admin:
+
+```bash
+pnpm admin:grant your@email.com
+```
+
+3. Open [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ## Database
 
@@ -88,7 +96,7 @@ See `packages/db/README.md` for table overview.
 
 ## Next steps
 
-1. Sudachi/JMdict automatic tokenization (replace demo dictionary)
-2. Admin panel for texts + token correction
+1. Admin: create/edit texts + token correction UI
+2. Sudachi/JMdict automatic tokenization (replace demo dictionary)
 3. AI sentence explain (cached)
 4. Progress charts on dashboard
