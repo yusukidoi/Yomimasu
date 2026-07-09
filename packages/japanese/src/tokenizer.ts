@@ -1,7 +1,9 @@
 import * as kuromoji from "@patdx/kuromoji";
 import NodeDictionaryLoader from "@patdx/kuromoji/node";
+import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   mapTokenKind,
   readingForFurigana,
@@ -29,11 +31,83 @@ type Tokenizer = {
 
 let tokenizerPromise: Promise<Tokenizer> | null = null;
 
+function isDictDir(path: string) {
+  return existsSync(join(path, "base.dat.gz"));
+}
+
+/**
+ * Resolve Kuromoji's on-disk dictionary.
+ * Next/Turbopack can mangle `require.resolve` into a fake `.../[project]/...`
+ * path, so we prefer filesystem discovery from cwd / this file.
+ */
 function dictionaryPath() {
-  const require = createRequire(import.meta.url);
-  // resolve() points at build/index.mjs — dict/ sits on the package root.
-  const entry = require.resolve("@patdx/kuromoji");
-  return join(dirname(entry), "..", "dict");
+  const candidates: string[] = [];
+
+  const pushResolved = (from: string) => {
+    try {
+      const entry = createRequire(from).resolve("@patdx/kuromoji");
+      // resolve() → .../build/index.mjs — dict/ is next to build/
+      candidates.push(join(dirname(entry), "..", "dict"));
+      candidates.push(join(dirname(entry), "dict"));
+    } catch {
+      // ignore — try other strategies
+    }
+  };
+
+  // 1) From this module (works under tsx / direct Node).
+  try {
+    pushResolved(fileURLToPath(import.meta.url));
+  } catch {
+    // ignore
+  }
+
+  // 2) Walk up from cwd and from this file looking for installed package.
+  const walkStarts = [process.cwd()];
+  try {
+    walkStarts.push(dirname(fileURLToPath(import.meta.url)));
+  } catch {
+    // ignore
+  }
+
+  for (const start of walkStarts) {
+    let dir = start;
+    for (let i = 0; i < 10; i += 1) {
+      candidates.push(join(dir, "node_modules", "@patdx", "kuromoji", "dict"));
+      candidates.push(
+        join(
+          dir,
+          "packages",
+          "japanese",
+          "node_modules",
+          "@patdx",
+          "kuromoji",
+          "dict",
+        ),
+      );
+      pushResolved(join(dir, "package.json"));
+      pushResolved(join(dir, "packages", "japanese", "package.json"));
+
+      const parent = dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  }
+
+  // Prefer real filesystem hits; skip Turbopack's fake `[project]` paths.
+  for (const candidate of candidates) {
+    if (candidate.includes(`${join("", "[project]")}`) || candidate.includes("[project]")) {
+      continue;
+    }
+    if (isDictDir(candidate)) return candidate;
+  }
+
+  for (const candidate of candidates) {
+    if (isDictDir(candidate)) return candidate;
+  }
+
+  throw new Error(
+    "Kuromoji dictionary not found (base.dat.gz). Reinstall deps with pnpm install.",
+  );
 }
 
 /**
@@ -42,11 +116,19 @@ function dictionaryPath() {
  */
 export async function getTokenizer(): Promise<Tokenizer> {
   if (!tokenizerPromise) {
+    const dicPath = dictionaryPath();
     tokenizerPromise = new kuromoji.TokenizerBuilder({
       loader: new NodeDictionaryLoader({
-        dic_path: dictionaryPath(),
+        dic_path: dicPath,
       }),
-    }).build() as Promise<Tokenizer>;
+    })
+      .build()
+      .then((tokenizer) => tokenizer as Tokenizer)
+      .catch((error) => {
+        // Allow retry after fixing install / path issues.
+        tokenizerPromise = null;
+        throw error;
+      });
   }
   return tokenizerPromise;
 }

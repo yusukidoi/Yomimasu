@@ -8,7 +8,9 @@ Japanese graded reader MVP — monorepo scaffold.
 - **Frontend + API:** Next.js (App Router) in `apps/web`
 - **Shared types:** `packages/shared`
 - **Database:** Drizzle ORM + PostgreSQL (Supabase) in `packages/db`
-- **Planned:** Supabase Auth, Sudachi tokenizer, OpenAI sentence explain
+- **Japanese NLP:** Kuromoji in `packages/japanese` (Milestone 1)
+- **Auth:** Supabase Auth
+- **Planned:** JMdict meanings, admin token correction, OpenAI sentence explain (cached)
 
 ## Project structure
 
@@ -17,8 +19,11 @@ yomimasu/
   apps/
     web/              Next.js app (UI + /api routes)
   packages/
-    db/               Drizzle schema + DB client
+    db/               Drizzle schema + DB client + process/store
+    japanese/         Kuromoji tokenizer
     shared/           Shared TypeScript types
+  docs/
+    milestone-1-technical-note.md
 ```
 
 ## Requirements
@@ -106,11 +111,14 @@ pnpm db:process -- --slug live-demo --body "昨日の夜、図書館で日本語
 ```
 
 Kuromoji tokenizer: `packages/japanese`  
-DB persistence: `packages/db` → `processAndStoreTextTokens`
+DB persistence: `packages/db` → `processAndStoreTextTokens` / `upsertAndProcessText`  
+Admin UI: `/admin` → paste Japanese → tokenize into Postgres → open `/read/[slug]`
+
+Milestone 1 acceptance note: [`docs/milestone-1-technical-note.md`](docs/milestone-1-technical-note.md)
 
 ## Next steps
 
-1. Milestone 1: API/admin path to process Flavio-provided text + staging verify
-2. Wire landing/dashboard charts to `reading_sessions` + `user_vocabulary`
-3. Admin: create/edit texts + token correction UI
-4. AI sentence explain (cached)
+1. Deploy staging (Vercel) + push to client GitHub for M1 acceptance
+2. JMdict meanings + richer admin tokenize/publish flow
+3. Wire landing/dashboard charts to `reading_sessions` + `user_vocabulary`
+4. Admin token correction UI + AI sentence explain (cached)

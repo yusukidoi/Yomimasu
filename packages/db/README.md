@@ -40,9 +40,20 @@ pnpm db:push       # push schema without migration files
 pnpm db:seed
 ```
 
-Upserts the two free MVP texts into `texts`.
+Upserts the free MVP texts into `texts` and tokenizes them with Kuromoji.
+
+## Process arbitrary Japanese (Milestone 1)
+
+```bash
+pnpm db:process -- --all-samples
+pnpm db:process -- --slug live-demo --body "昨日の夜、図書館で日本語の本を読みました。"
+```
+
+Programmatic path: `upsertAndProcessText` / `processAndStoreTextTokens`  
+Web path: admin `POST /api/admin/texts/process` (see `/admin`)
 
 ## Notes
 
-- Prefer Session/Transaction pooler `DATABASE_URL` from Supabase Connect → Direct.
+- Prefer Session/Transaction pooler `DATABASE_URL` from Supabase Connect.
 - Profile creation happens from the web app on login (`ensureProfile`).
+- See `docs/milestone-1-technical-note.md` for M1 limitations.

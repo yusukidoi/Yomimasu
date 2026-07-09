@@ -68,21 +68,27 @@ export async function POST(request: Request) {
     slugify(title) ||
     `text-${Date.now().toString(36)}`;
 
-  const result = await upsertAndProcessText(db, {
-    slug,
-    title,
-    body,
-    level: input.level ?? "N5",
-    isFree: true,
-  });
+  try {
+    const result = await upsertAndProcessText(db, {
+      slug,
+      title,
+      body,
+      level: input.level ?? "N5",
+      isFree: true,
+    });
 
-  return NextResponse.json({
-    ok: true,
-    slug: result.slug,
-    textId: result.textId,
-    created: result.created,
-    sentenceCount: result.sentenceCount,
-    tokenCount: result.tokenCount,
-    readerPath: `/read/${result.slug}`,
-  });
+    return NextResponse.json({
+      ok: true,
+      slug: result.slug,
+      textId: result.textId,
+      created: result.created,
+      sentenceCount: result.sentenceCount,
+      tokenCount: result.tokenCount,
+      readerPath: `/read/${result.slug}`,
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to process text";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
