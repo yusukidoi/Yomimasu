@@ -120,7 +120,7 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
 
       <article className="relative mt-8 space-y-6">
         {text.sentences.map((sentence) => (
-          <p
+          <div
             key={sentence.id}
             className="font-display text-2xl leading-[2.1] text-ink md:text-[1.7rem]"
           >
@@ -142,7 +142,7 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
                 ) : null}
               </span>
             ))}
-          </p>
+          </div>
         ))}
       </article>
 
