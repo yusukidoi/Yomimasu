@@ -6,31 +6,31 @@ const CATEGORIES = [
     title: "N5 Daily Life",
     count: 24,
     href: "/#library",
-    gradient: "from-[#f3d6c4] via-[#e8b89a] to-[#c97b63]",
+    image: "/texts/cat-daily-life.png",
   },
   {
     title: "N4 Stories",
     count: 28,
     href: "/read/n4-spring-picnic",
-    gradient: "from-[#d9e8d4] via-[#a8c9a0] to-[#6f9b6a]",
+    image: "/texts/cat-stories.png",
   },
   {
     title: "N3 News",
     count: 20,
     href: "/#library",
-    gradient: "from-[#d6e0ef] via-[#9eb4d4] to-[#5f7fa8]",
+    image: "/texts/cat-news.png",
   },
   {
     title: "Travel",
     count: 18,
     href: "/#library",
-    gradient: "from-[#f0e0c8] via-[#d4b48a] to-[#a67c52]",
+    image: "/texts/cat-travel.png",
   },
   {
     title: "Work & School",
     count: 20,
     href: "/#library",
-    gradient: "from-[#e8d5e0] via-[#c9a0b4] to-[#8f6a7c]",
+    image: "/texts/cat-work-school.png",
   },
 ] as const;
 
@@ -68,12 +68,17 @@ export function LandingCategories() {
           <Link
             key={category.title}
             href={category.href}
-            className="group overflow-hidden rounded-2xl border border-line bg-white/80 transition hover:border-sakura/40"
+            className="group overflow-hidden rounded-2xl border border-line bg-white/80 transition hover:border-sakura/40 hover:shadow-[0_18px_40px_rgba(43,38,36,0.06)]"
           >
-            <div
-              className={`h-28 bg-gradient-to-br ${category.gradient} transition duration-500 group-hover:scale-[1.03]`}
-              aria-hidden
-            />
+            <div className="relative h-28 overflow-hidden">
+              <Image
+                src={category.image}
+                alt={category.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.05]"
+              />
+            </div>
             <div className="p-4">
               <h3 className="font-medium text-ink">{category.title}</h3>
               <p className="mt-1 text-sm text-ink-muted">{category.count} texts</p>

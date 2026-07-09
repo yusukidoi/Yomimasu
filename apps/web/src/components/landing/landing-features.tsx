@@ -58,12 +58,12 @@ export function LandingFeatures() {
   return (
     <section id="features" className="relative mt-24">
       <Image
-        src="/decorations/sakura-vertical.png?v=2"
+        src="/decorations/sakura-vertical.png"
         alt=""
         aria-hidden
         width={200}
         height={267}
-        className="pointer-events-none absolute -right-16 -top-10 hidden w-44 rotate-[38deg] select-none mix-blend-multiply lg:block"
+        className="pointer-events-none absolute -right-16 -top-10 hidden w-44 rotate-[60deg] select-none mix-blend-multiply lg:block"
       />
 
       <div className="mx-auto max-w-3xl text-center">

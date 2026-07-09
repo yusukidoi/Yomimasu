@@ -1,10 +1,11 @@
 import { listPublishedTexts, SAMPLE_TEXTS } from "@yomimasu/db";
-import Link from "next/link";
 import { LandingCategories } from "@/components/landing/landing-categories";
 import { LandingCta } from "@/components/landing/landing-cta";
 import { LandingFeatures } from "@/components/landing/landing-features";
+import { LandingFreeTexts } from "@/components/landing/landing-free-texts";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingProgressPreview } from "@/components/landing/landing-progress-preview";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { tryGetDb } from "@/lib/db";
 
@@ -14,6 +15,7 @@ type FreeTextCard = {
   id: string;
   slug: string;
   title: string;
+  titleJa: string | null;
   level: string;
   topic: string | null;
   summary: string | null;
@@ -25,6 +27,7 @@ function fallbackFreeTexts(): FreeTextCard[] {
     id: `fallback-${index}`,
     slug: text.slug,
     title: text.title,
+    titleJa: text.titleJa,
     level: text.level,
     topic: text.topic,
     summary: text.summary,
@@ -70,36 +73,14 @@ export default async function Home() {
 
         <LandingFeatures />
 
-        <section id="library" className="mt-24">
-          <h2 className="font-display text-3xl font-semibold text-ink">Free texts</h2>
-          <p className="mt-2 text-ink-muted">
-            Start reading with no account.
-          </p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {freeTexts.map((text) => (
-              <Link
-                key={text.id}
-                href={`/read/${text.slug}`}
-                className="rounded-2xl border border-line bg-white/80 p-5 transition hover:border-sakura/40"
-              >
-                <p className="text-sm font-medium text-sakura-deep">
-                  {text.level}
-                  {text.topic ? ` · ${text.topic}` : ""}
-                </p>
-                <h3 className="mt-2 text-xl font-semibold text-ink">{text.title}</h3>
-                <p className="mt-2 text-sm text-ink-muted">
-                  {text.summary ?? `${text.estimatedMinutes} min read`}
-                </p>
-                <p className="mt-4 text-sm font-medium text-ink">Read now →</p>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <LandingFreeTexts texts={freeTexts} />
 
         <LandingCategories />
         <LandingProgressPreview />
         <LandingCta startReadingHref={startReadingHref} />
       </main>
+
+      <SiteFooter />
     </div>
   );
 }
