@@ -44,10 +44,8 @@ This note documents what Milestone 1 delivers, known limitations, risks for the 
 
 ### Dictionary / meanings
 
-- **English meanings are incomplete.** Kuromoji provides morphology (surface, reading, lemma, POS), not JMdict glosses.
-- Particles get a small built-in meaning map; some sample-lexicon hits may still appear for known demo words.
-- Many content words show **meaning: null** until JMdict (or admin override) is wired — **Milestone 2/3**.
-- Popup still works: reading, lemma, POS display when present; meaning shows when stored.
+- **English meanings use an interim high-frequency word list** (~150+ lemmas) plus the original demo lexicon and particle map. Words like ご飯, 学校, 一緒 now get glosses when reprocessed.
+- **Not full JMdict coverage yet** — uncommon words may still show reading/lemma only until Milestone 2.
 
 ### Admin / content workflow
 

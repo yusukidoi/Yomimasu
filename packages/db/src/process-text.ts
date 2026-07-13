@@ -1,45 +1,8 @@
 import { processJapaneseText } from "@yomimasu/japanese";
 import { eq } from "drizzle-orm";
 import type { Database } from "./client";
+import { lookupTokenMeaning } from "./meanings/lookup";
 import { textSentences, texts, textTokens } from "./schema";
-import { DEMO_LEXICON } from "./seed/token-dictionary";
-
-const PARTICLE_MEANINGS: Record<string, string> = {
-  は: "topic marker",
-  が: "subject marker",
-  を: "object marker",
-  に: "time / location / indirect object marker",
-  へ: "direction marker",
-  で: "location of action / means",
-  と: "with / and",
-  も: "also / too",
-  の: "possessive / modifier",
-  から: "from / because",
-  まで: "until / as far as",
-  より: "than / from",
-  や: "and (incomplete list)",
-  ね: "seeking agreement",
-  よ: "emphasis",
-  か: "question marker",
-};
-
-const meaningBySurface = new Map(
-  DEMO_LEXICON.map((entry) => [entry.surface, entry.meaning] as const),
-);
-const meaningByLemma = new Map(
-  DEMO_LEXICON.map((entry) => [entry.lemma, entry.meaning] as const),
-);
-
-function lookupMeaning(surface: string, lemma: string | null, kind: string) {
-  if (kind === "particle") {
-    return PARTICLE_MEANINGS[surface] ?? PARTICLE_MEANINGS[lemma ?? ""] ?? null;
-  }
-  return (
-    meaningBySurface.get(surface) ??
-    (lemma ? meaningByLemma.get(lemma) : undefined) ??
-    null
-  );
-}
 
 export type ProcessTextResult = {
   textId: string;
@@ -85,7 +48,7 @@ export async function processAndStoreTextTokens(
         kind: token.kind,
         meaning:
           token.meaning ??
-          lookupMeaning(token.surface, token.lemma, token.kind),
+          lookupTokenMeaning(token.surface, token.lemma, token.kind),
         grammarForm: token.grammarForm,
       })),
     );
