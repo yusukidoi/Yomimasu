@@ -114,6 +114,8 @@ Kuromoji tokenizer: `packages/japanese`
 DB persistence: `packages/db` → `processAndStoreTextTokens` / `upsertAndProcessText`  
 Admin UI: `/admin` → paste Japanese → tokenize into Postgres → open `/read/[slug]`
 
+**Vercel / staging:** `pnpm install` runs `postinstall`, which copies Kuromoji dict files into `packages/japanese/vendor/dict`. Next.js includes them in the serverless bundle via `outputFileTracingIncludes`. If tokenization fails on deploy, redeploy after a fresh install (not just cache reuse).
+
 Milestone 1 acceptance note: [`docs/milestone-1-technical-note.md`](docs/milestone-1-technical-note.md)
 
 ## Next steps

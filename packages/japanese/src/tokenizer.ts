@@ -35,18 +35,39 @@ function isDictDir(path: string) {
   return existsSync(join(path, "base.dat.gz"));
 }
 
+function bundledDictPath() {
+  try {
+    return join(dirname(fileURLToPath(import.meta.url)), "..", "vendor", "dict");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Resolve Kuromoji's on-disk dictionary.
- * Next/Turbopack can mangle `require.resolve` into a fake `.../[project]/...`
- * path, so we prefer filesystem discovery from cwd / this file.
+ * Local dev uses node_modules; Vercel uses vendored copy + outputFileTracingIncludes.
  */
 function dictionaryPath() {
+  if (process.env.KUROMOJI_DIC_PATH && isDictDir(process.env.KUROMOJI_DIC_PATH)) {
+    return process.env.KUROMOJI_DIC_PATH;
+  }
+
   const candidates: string[] = [];
+
+  const bundled = bundledDictPath();
+  if (bundled) candidates.push(bundled);
+
+  // Monorepo layouts (local + Vercel traced files).
+  const cwd = process.cwd();
+  candidates.push(
+    join(cwd, "packages/japanese/vendor/dict"),
+    join(cwd, "../packages/japanese/vendor/dict"),
+    join(cwd, "../../packages/japanese/vendor/dict"),
+  );
 
   const pushResolved = (from: string) => {
     try {
       const entry = createRequire(from).resolve("@patdx/kuromoji");
-      // resolve() → .../build/index.mjs — dict/ is next to build/
       candidates.push(join(dirname(entry), "..", "dict"));
       candidates.push(join(dirname(entry), "dict"));
     } catch {
@@ -54,15 +75,13 @@ function dictionaryPath() {
     }
   };
 
-  // 1) From this module (works under tsx / direct Node).
   try {
     pushResolved(fileURLToPath(import.meta.url));
   } catch {
     // ignore
   }
 
-  // 2) Walk up from cwd and from this file looking for installed package.
-  const walkStarts = [process.cwd()];
+  const walkStarts = [cwd];
   try {
     walkStarts.push(dirname(fileURLToPath(import.meta.url)));
   } catch {
@@ -84,6 +103,7 @@ function dictionaryPath() {
           "dict",
         ),
       );
+      candidates.push(join(dir, "packages", "japanese", "vendor", "dict"));
       pushResolved(join(dir, "package.json"));
       pushResolved(join(dir, "packages", "japanese", "package.json"));
 
@@ -93,11 +113,8 @@ function dictionaryPath() {
     }
   }
 
-  // Prefer real filesystem hits; skip Turbopack's fake `[project]` paths.
   for (const candidate of candidates) {
-    if (candidate.includes(`${join("", "[project]")}`) || candidate.includes("[project]")) {
-      continue;
-    }
+    if (candidate.includes("[project]")) continue;
     if (isDictDir(candidate)) return candidate;
   }
 
@@ -106,7 +123,7 @@ function dictionaryPath() {
   }
 
   throw new Error(
-    "Kuromoji dictionary not found (base.dat.gz). Reinstall deps with pnpm install.",
+    "Kuromoji dictionary not found (base.dat.gz). Run pnpm install, then redeploy.",
   );
 }
 

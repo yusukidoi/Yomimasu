@@ -7,6 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "postinstall": "node scripts/copy-dict.mjs",
     "tokenize:demo": "tsx src/cli-demo.ts",
     "typecheck": "tsc --noEmit"
   },

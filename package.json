@@ -2,6 +2,7 @@
   "name": "yomimasu",
   "private": true,
   "scripts": {
+    "postinstall": "node packages/japanese/scripts/copy-dict.mjs",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
