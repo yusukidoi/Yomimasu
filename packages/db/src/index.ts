@@ -27,6 +27,10 @@ export {
   type UpsertAndProcessTextResult,
 } from "./process-text";
 export {
+  findCachedExplanation,
+  storeExplanation,
+} from "./ai-explanations";
+export {
   getProgressSummary,
   recordReadingHeartbeat,
   type ProgressSummary,

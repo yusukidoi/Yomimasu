@@ -40,6 +40,13 @@ export type ReaderText = {
   sentences: ReaderSentence[];
 };
 
+export type AiExplanationPayload = {
+  translation: string;
+  breakdown: string;
+  tip: string;
+  focusToken: string | null;
+};
+
 export type HealthResponse = {
   status: "ok";
   service: "yomimasu-api";

@@ -1,6 +1,11 @@
 "use client";
 
-import type { ReaderText, ReaderToken } from "@yomimasu/shared";
+import type {
+  AiExplanationPayload,
+  ReaderSentence,
+  ReaderText,
+  ReaderToken,
+} from "@yomimasu/shared";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { TokenPopup } from "./token-popup";
@@ -60,6 +65,17 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
   const [showFurigana, setShowFurigana] = useState(true);
   const [selectedToken, setSelectedToken] = useState<ReaderToken | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [explainingId, setExplainingId] = useState<string | null>(null);
+  const [explanations, setExplanations] = useState<
+    Record<
+      string,
+      {
+        explanation: AiExplanationPayload;
+        cached: boolean;
+        source: string;
+      }
+    >
+  >({});
 
   const totalTokens = useMemo(
     () => text.sentences.reduce((sum, sentence) => sum + sentence.tokens.length, 0),
@@ -98,6 +114,54 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
     };
   }, [isLoggedIn, text.id]);
 
+  async function explainSentence(sentence: ReaderSentence) {
+    const focusInSentence = sentence.tokens.some(
+      (token) => token.id === selectedToken?.id,
+    )
+      ? selectedToken?.surface
+      : null;
+
+    setExplainingId(sentence.id);
+    try {
+      const response = await fetch("/api/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          textId: text.id,
+          sentenceId: sentence.id,
+          sentenceSurface: sentence.surface,
+          selectedTokenSurface: focusInSentence,
+          userLevel: text.level,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        explanation?: AiExplanationPayload;
+        cached?: boolean;
+        source?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !data.explanation) {
+        setStatusMessage(data.error ?? "Could not explain this sentence.");
+        return;
+      }
+
+      setExplanations((current) => ({
+        ...current,
+        [sentence.id]: {
+          explanation: data.explanation!,
+          cached: Boolean(data.cached),
+          source: data.source ?? "demo",
+        },
+      }));
+    } catch {
+      setStatusMessage("Could not explain this sentence.");
+    } finally {
+      setExplainingId(null);
+    }
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 pb-12 pt-4">
       <header className="border-b border-line pb-6">
@@ -123,7 +187,9 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
       </header>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm">
-        <p className="text-ink-muted">Click any word or particle for instant help.</p>
+        <p className="text-ink-muted">
+          Click any word for instant help, or Explain for the whole sentence.
+        </p>
         <label className="flex items-center gap-2 font-medium text-ink">
           <input
             type="checkbox"
@@ -141,32 +207,58 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
         </p>
       ) : null}
 
-      <article className="relative mt-8 space-y-6">
-        {text.sentences.map((sentence) => (
-          <div
-            key={sentence.id}
-            className="font-display text-2xl leading-[2.1] text-ink md:text-[1.7rem]"
-          >
-            {sentence.tokens.map((token) => (
-              <span key={token.id} className="relative inline">
-                <TokenSpan
-                  token={token}
-                  showFurigana={showFurigana}
-                  isSelected={selectedToken?.id === token.id}
-                  onSelect={setSelectedToken}
-                />
-                {selectedToken?.id === token.id ? (
-                  <TokenPopup
-                    token={token}
-                    isLoggedIn={isLoggedIn}
-                    onClose={() => setSelectedToken(null)}
-                    onSaved={setStatusMessage}
-                  />
+      <article className="relative mt-8 space-y-8">
+        {text.sentences.map((sentence) => {
+          const result = explanations[sentence.id];
+          return (
+            <div key={sentence.id} className="space-y-3">
+              <div className="font-display text-2xl leading-[2.1] text-ink md:text-[1.7rem]">
+                {sentence.tokens.map((token) => (
+                  <span key={token.id} className="relative inline">
+                    <TokenSpan
+                      token={token}
+                      showFurigana={showFurigana}
+                      isSelected={selectedToken?.id === token.id}
+                      onSelect={setSelectedToken}
+                    />
+                    {selectedToken?.id === token.id ? (
+                      <TokenPopup
+                        token={token}
+                        isLoggedIn={isLoggedIn}
+                        onClose={() => setSelectedToken(null)}
+                        onSaved={setStatusMessage}
+                      />
+                    ) : null}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => void explainSentence(sentence)}
+                  disabled={explainingId === sentence.id}
+                  className="rounded-full border border-line bg-white/80 px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-paper disabled:opacity-60"
+                >
+                  {explainingId === sentence.id ? "Explaining…" : "Explain"}
+                </button>
+                {result ? (
+                  <span className="text-xs text-ink-muted">
+                    {result.cached ? "Cached" : "Fresh"} · {result.source}
+                  </span>
                 ) : null}
-              </span>
-            ))}
-          </div>
-        ))}
+              </div>
+
+              {result ? (
+                <div className="rounded-2xl border border-line bg-white/85 px-4 py-4 text-sm leading-relaxed text-ink-muted">
+                  <p className="font-medium text-ink">{result.explanation.translation}</p>
+                  <p className="mt-3">{result.explanation.breakdown}</p>
+                  <p className="mt-3 text-xs">{result.explanation.tip}</p>
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
       </article>
 
       {text.translationEn ? (
