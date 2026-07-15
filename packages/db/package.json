@@ -17,6 +17,7 @@
     "db:process": "tsx src/seed/process-text-cli.ts",
     "admin:grant": "tsx src/seed/grant-admin.ts",
     "role:set": "tsx src/seed/grant-role.ts",
+    "db:baseline": "tsx src/seed/baseline-and-migrate.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

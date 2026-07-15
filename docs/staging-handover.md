@@ -69,8 +69,4 @@ Hand the client:
 
 ## Staging URL
 
-_Record the live URL here after deploy:_
-
-```
-https://________________.vercel.app
-```
+https://yomimasu-web.vercel.app/
