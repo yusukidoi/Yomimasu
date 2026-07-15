@@ -16,6 +16,7 @@
     "db:seed-dictionary": "tsx src/seed/seed-dictionary.ts",
     "db:process": "tsx src/seed/process-text-cli.ts",
     "admin:grant": "tsx src/seed/grant-admin.ts",
+    "role:set": "tsx src/seed/grant-role.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

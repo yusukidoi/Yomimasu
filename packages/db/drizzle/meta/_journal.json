@@ -8,6 +8,13 @@
       "when": 1783514417059,
       "tag": "0000_sturdy_silver_samurai",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784086018597,
+      "tag": "0001_flat_rhino",
+      "breakpoints": true
     }
   ]
 }

@@ -23,8 +23,8 @@ pnpm db:push       # push schema without migration files
 
 | Table | Purpose |
 |-------|---------|
-| `profiles` | User profile (id matches Supabase Auth user) |
-| `texts` | Graded reading texts |
+| `profiles` | User profile (id matches Supabase Auth user; `account_role` free/premium) |
+| `texts` | Graded reading texts (`header_image_url`, topic, free flag, status) |
 | `text_sentences` | Sentence split per text |
 | `text_tokens` | Tokenized words/particles with readings |
 | `text_phrases` | Admin-defined multi-token phrases |
@@ -33,6 +33,7 @@ pnpm db:push       # push schema without migration files
 | `user_vocabulary` | Saved / known / read words per user |
 | `reading_sessions` | Per-text reading progress |
 | `ai_explanations` | Cached OpenAI sentence explanations |
+| `ai_usage_events` | Per-user AI explain usage (cached vs fresh) |
 
 ## Seed sample texts
 

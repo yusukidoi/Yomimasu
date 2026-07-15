@@ -1,6 +1,6 @@
 # Yomimasu
 
-Japanese graded reader MVP — monorepo scaffold.
+Japanese graded reader MVP — monorepo.
 
 ## Stack
 
@@ -8,9 +8,9 @@ Japanese graded reader MVP — monorepo scaffold.
 - **Frontend + API:** Next.js (App Router) in `apps/web`
 - **Shared types:** `packages/shared`
 - **Database:** Drizzle ORM + PostgreSQL (Supabase) in `packages/db`
-- **Japanese NLP:** Kuromoji in `packages/japanese` (Milestone 1)
-- **Auth:** Supabase Auth
-- **Planned:** JMdict meanings, admin token correction, OpenAI sentence explain (cached)
+- **Japanese NLP:** Kuromoji in `packages/japanese`
+- **Auth:** Supabase Auth (profiles with `free` / `premium` + `isAdmin`)
+- **AI:** OpenAI sentence explain only (cached in `ai_explanations`, usage in `ai_usage_events`)
 
 ## Project structure
 
@@ -24,6 +24,7 @@ yomimasu/
     shared/           Shared TypeScript types
   docs/
     milestone-1-technical-note.md
+    staging-handover.md
 ```
 
 ## Requirements
@@ -40,7 +41,13 @@ cp packages/db/.env.example packages/db/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-Fill `DATABASE_URL` (and later Supabase keys) in those env files.
+Fill `DATABASE_URL`, Supabase keys, and optionally `OPENAI_API_KEY` in those env files.
+Then apply schema:
+
+```bash
+pnpm db:push
+# or pnpm db:migrate after pnpm db:generate
+```
 
 ## Development
 
@@ -48,7 +55,7 @@ Fill `DATABASE_URL` (and later Supabase keys) in those env files.
 pnpm dev
 ```
 
-## Authentication
+## Authentication & roles
 
 Email/password auth is handled by Supabase.
 
@@ -59,24 +66,34 @@ Email/password auth is handled by Supabase.
 
 Protected routes: `/app`, `/admin`
 
+```bash
+pnpm admin:grant your@email.com
+pnpm role:set your@email.com premium   # or free
+```
+
+- **Admin** (`is_admin`): content + token tools
+- **Free / premium** (`account_role`): library access to non-free texts
+
 ## Seed sample texts
 
 ```bash
 pnpm db:seed
+pnpm db:seed-dictionary
 ```
 
-Seeds two free published texts with token data.
+## Admin content
 
-## Admin access
+1. Open [http://localhost:3000/admin](http://localhost:3000/admin)
+2. Paste Japanese → tokenize as draft or published (topic, free flag, header image URL)
+3. Publish / unpublish / archive from the table
+4. Correct tokens → `Reader` or `Preview`
 
-1. Sign up once in the app (creates a `profiles` row).
-2. Grant admin:
+## Library & reader
 
-```bash
-pnpm admin:grant your@email.com
-```
-
-3. Open [http://localhost:3000/admin](http://localhost:3000/admin)
+- Published texts: `/library`
+- Reader: `/read/[slug]` (drafts need admin `?preview=1`)
+- Word popups use stored token data (never AI)
+- Sentence **Explain** uses OpenAI when keyed, otherwise demo + DB cache
 
 ## Database
 
@@ -98,29 +115,23 @@ See `packages/db/README.md` for table overview.
 | `pnpm lint` | Lint all packages |
 | `pnpm typecheck` | Type-check all packages |
 | `pnpm db:*` | Database generate / migrate / push / studio |
+| `pnpm admin:grant` | Grant admin on a profile email |
+| `pnpm role:set` | Set free/premium on a profile email |
 
 ## Japanese processing
 
 ```bash
-# Tokenize only (no DB)
 pnpm --filter @yomimasu/japanese tokenize:demo
-
-# Process + store tokens in Supabase/Postgres
 pnpm db:process -- --all-samples
 pnpm db:process -- --slug live-demo --body "昨日の夜、図書館で日本語の本を読みました。"
 ```
 
-Kuromoji tokenizer: `packages/japanese`  
-DB persistence: `packages/db` → `processAndStoreTextTokens` / `upsertAndProcessText`  
-Admin UI: `/admin` → paste Japanese → tokenize into Postgres → open `/read/[slug]`
+**Vercel / staging:** `pnpm install` runs `postinstall`, which copies Kuromoji dict files into `packages/japanese/vendor/dict`. Next.js includes them in the serverless bundle via `outputFileTracingIncludes`.
 
-**Vercel / staging:** `pnpm install` runs `postinstall`, which copies Kuromoji dict files into `packages/japanese/vendor/dict`. Next.js includes them in the serverless bundle via `outputFileTracingIncludes`. If tokenization fails on deploy, redeploy after a fresh install (not just cache reuse).
+Milestone 1 note: [`docs/milestone-1-technical-note.md`](docs/milestone-1-technical-note.md)  
+Staging handover: [`docs/staging-handover.md`](docs/staging-handover.md)
 
-Milestone 1 acceptance note: [`docs/milestone-1-technical-note.md`](docs/milestone-1-technical-note.md)
+## Milestone status
 
-## Next steps
-
-1. Deploy staging (Vercel) + push to client GitHub for M1 acceptance
-2. JMdict meanings + richer admin tokenize/publish flow
-3. Wire landing/dashboard charts to `reading_sessions` + `user_vocabulary`
-4. Admin token correction UI + AI sentence explain (cached)
+- **M1** technical criteria: implemented locally; formal acceptance needs staging URL + client GitHub access
+- **M2** working MVP gaps closed in this codebase path: roles, library gating, admin publish UI, AI context/usage, live dashboard counts

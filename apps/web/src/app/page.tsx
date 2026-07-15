@@ -25,6 +25,7 @@ type FreeTextCard = {
   topic: string | null;
   summary: string | null;
   estimatedMinutes: number;
+  headerImageUrl: string | null;
 };
 
 function fallbackFreeTexts(): FreeTextCard[] {
@@ -37,6 +38,7 @@ function fallbackFreeTexts(): FreeTextCard[] {
     topic: text.topic,
     summary: text.summary,
     estimatedMinutes: text.estimatedMinutes,
+    headerImageUrl: null,
   }));
 }
 
@@ -48,7 +50,17 @@ async function loadFreeTexts(): Promise<FreeTextCard[]> {
     const allPublished = await listPublishedTexts(db);
     const freeTexts = allPublished.filter((text) => text.isFree);
     if (freeTexts.length === 0) return fallbackFreeTexts();
-    return freeTexts;
+    return freeTexts.map((text) => ({
+      id: text.id,
+      slug: text.slug,
+      title: text.title,
+      titleJa: text.titleJa,
+      level: text.level,
+      topic: text.topic,
+      summary: text.summary,
+      estimatedMinutes: text.estimatedMinutes,
+      headerImageUrl: text.headerImageUrl,
+    }));
   } catch {
     return fallbackFreeTexts();
   }

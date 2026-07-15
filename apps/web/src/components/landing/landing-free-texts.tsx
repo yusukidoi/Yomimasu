@@ -11,6 +11,7 @@ export type FreeText = {
   topic: string | null;
   summary: string | null;
   estimatedMinutes: number;
+  headerImageUrl?: string | null;
 };
 
 const IMAGE_BY_SLUG: Record<string, string> = {
@@ -23,8 +24,39 @@ const FALLBACK_IMAGES = [
   "/texts/text-spring-picnic.png",
 ];
 
-function imageForText(slug: string, index: number) {
+function imageForText(
+  slug: string,
+  index: number,
+  headerImageUrl?: string | null,
+) {
+  if (headerImageUrl) return headerImageUrl;
   return IMAGE_BY_SLUG[slug] ?? FALLBACK_IMAGES[index % FALLBACK_IMAGES.length];
+}
+
+function CoverImage({
+  src,
+  alt,
+}: {
+  src: string;
+  alt: string;
+}) {
+  const isRemote = /^https?:\/\//i.test(src);
+  if (isRemote) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={src} alt={alt} className="h-full w-full object-cover" />
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="(max-width: 640px) 100vw, 176px"
+      className="object-cover"
+    />
+  );
 }
 
 type LandingFreeTextsProps = {
@@ -49,12 +81,9 @@ export function LandingFreeTexts({ texts }: LandingFreeTextsProps) {
             className="flex flex-col overflow-hidden rounded-2xl border border-line bg-white/80 transition hover:border-sakura/40 hover:shadow-[0_18px_40px_rgba(43,38,36,0.06)] sm:flex-row"
           >
             <div className="relative h-48 w-full shrink-0 sm:h-auto sm:w-44">
-              <Image
-                src={imageForText(text.slug, index)}
+              <CoverImage
+                src={imageForText(text.slug, index, text.headerImageUrl)}
                 alt={text.title}
-                fill
-                sizes="(max-width: 640px) 100vw, 176px"
-                className="object-cover"
               />
             </div>
 
@@ -62,6 +91,11 @@ export function LandingFreeTexts({ texts }: LandingFreeTextsProps) {
               <span className="inline-flex w-fit rounded-full bg-sakura-deep/10 px-3 py-1 text-xs font-medium text-sakura-deep">
                 Free text
               </span>
+              {text.topic ? (
+                <p className="mt-2 text-xs uppercase tracking-[0.14em] text-ink-muted">
+                  {text.topic}
+                </p>
+              ) : null}
               <h3 className="mt-3 text-lg font-semibold text-ink">
                 {text.title}
               </h3>

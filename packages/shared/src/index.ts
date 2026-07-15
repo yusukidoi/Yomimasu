@@ -34,11 +34,14 @@ export type ReaderText = {
   topic: string | null;
   summary: string | null;
   translationEn: string | null;
+  headerImageUrl: string | null;
   estimatedMinutes: number;
   wordCount: number;
   isFree: boolean;
   sentences: ReaderSentence[];
 };
+
+export type AccountRole = "free" | "premium";
 
 export type AiExplanationPayload = {
   translation: string;

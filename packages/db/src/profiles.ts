@@ -62,3 +62,26 @@ export async function setProfileAdmin(
     .returning();
   return updated;
 }
+
+export async function setProfileAccountRole(
+  db: Database,
+  userId: string,
+  accountRole: "free" | "premium",
+) {
+  const [updated] = await db
+    .update(profiles)
+    .set({ accountRole, updatedAt: new Date() })
+    .where(eq(profiles.id, userId))
+    .returning();
+  return updated;
+}
+
+export function canAccessPremiumContent(input: {
+  isFree: boolean;
+  isAdmin?: boolean | null;
+  accountRole?: "free" | "premium" | null;
+}) {
+  if (input.isFree) return true;
+  if (input.isAdmin) return true;
+  return input.accountRole === "premium";
+}

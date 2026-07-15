@@ -1,5 +1,6 @@
 import {
   findCachedExplanation,
+  recordAiUsageEvent,
   storeExplanation,
 } from "@yomimasu/db";
 import type { AiExplanationPayload, JlptLevel } from "@yomimasu/shared";
@@ -19,6 +20,8 @@ type ExplainBody = {
   sentenceId?: string;
   sentenceSurface?: string;
   selectedTokenSurface?: string | null;
+  previousSentence?: string | null;
+  nextSentence?: string | null;
   userLevel?: JlptLevel;
 };
 
@@ -58,6 +61,15 @@ export async function POST(request: Request) {
   });
 
   if (cached) {
+    if (user) {
+      await recordAiUsageEvent(db, {
+        userId: user.id,
+        textId: body.textId ?? null,
+        sentenceId: body.sentenceId ?? null,
+        cached: true,
+        model: cached.model,
+      });
+    }
     return NextResponse.json({
       explanation: cached.response as AiExplanationPayload,
       cached: true,
@@ -76,6 +88,8 @@ export async function POST(request: Request) {
       const generated = await generateOpenAiExplanation({
         sentenceSurface,
         selectedTokenSurface: body.selectedTokenSurface,
+        previousSentence: body.previousSentence,
+        nextSentence: body.nextSentence,
         userLevel,
         apiKey,
       });
@@ -91,13 +105,14 @@ export async function POST(request: Request) {
     payload = buildDemoExplanation({
       sentenceSurface,
       selectedTokenSurface: body.selectedTokenSurface,
+      previousSentence: body.previousSentence,
+      nextSentence: body.nextSentence,
       userLevel,
     });
     model = "demo-local";
     source = "demo";
   }
 
-  // Ensure profile path works when logged in; guests still get cache writes.
   const stored = await storeExplanation(getDb(), {
     textId: body.textId ?? null,
     sentenceId: body.sentenceId ?? null,
@@ -107,6 +122,16 @@ export async function POST(request: Request) {
     response: payload,
     model,
   });
+
+  if (user) {
+    await recordAiUsageEvent(db, {
+      userId: user.id,
+      textId: body.textId ?? null,
+      sentenceId: body.sentenceId ?? null,
+      cached: false,
+      model: stored.model,
+    });
+  }
 
   return NextResponse.json({
     explanation: stored.response as AiExplanationPayload,

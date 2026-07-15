@@ -19,12 +19,16 @@ export async function listPublishedTexts(db: Database) {
 export async function getTextForReader(
   db: Database,
   slug: string,
+  options?: { allowUnpublished?: boolean },
 ): Promise<ReaderText | null> {
   const text = await db.query.texts.findFirst({
     where: eq(texts.slug, slug),
   });
 
   if (!text) return null;
+  if (text.status !== "published" && !options?.allowUnpublished) {
+    return null;
+  }
 
   const sentences = await db.query.textSentences.findMany({
     where: eq(textSentences.textId, text.id),
@@ -70,6 +74,7 @@ export async function getTextForReader(
     topic: text.topic,
     summary: text.summary,
     translationEn: text.translationEn,
+    headerImageUrl: text.headerImageUrl,
     estimatedMinutes: text.estimatedMinutes,
     wordCount: text.wordCount,
     isFree: text.isFree,

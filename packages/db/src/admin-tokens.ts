@@ -73,7 +73,7 @@ export async function setTextPublishStatus(
       publishedAt:
         status === "published"
           ? (existing.publishedAt ?? new Date())
-          : existing.publishedAt,
+          : null,
       updatedAt: new Date(),
     })
     .where(eq(texts.slug, slug))

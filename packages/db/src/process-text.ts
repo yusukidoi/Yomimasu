@@ -102,6 +102,8 @@ export type UpsertAndProcessTextInput = {
   level?: "N5" | "N4" | "N3";
   isFree?: boolean;
   status?: "draft" | "published";
+  topic?: string | null;
+  headerImageUrl?: string | null;
 };
 
 export type UpsertAndProcessTextResult = ProcessTextResult & {
@@ -121,6 +123,8 @@ export async function upsertAndProcessText(
   const level = input.level ?? "N5";
   const isFree = input.isFree ?? true;
   const status = input.status ?? "published";
+  const topic = input.topic?.trim() || null;
+  const headerImageUrl = input.headerImageUrl?.trim() || null;
   const existing = await db.query.texts.findFirst({
     where: eq(texts.slug, input.slug),
   });
@@ -137,11 +141,13 @@ export async function upsertAndProcessText(
         level,
         status,
         isFree,
+        topic,
+        headerImageUrl,
         updatedAt: new Date(),
         publishedAt:
           status === "published"
             ? (existing.publishedAt ?? new Date())
-            : existing.publishedAt,
+            : null,
         estimatedMinutes: Math.max(1, Math.ceil(input.body.length / 80)),
       })
       .where(eq(texts.id, existing.id))
@@ -157,6 +163,8 @@ export async function upsertAndProcessText(
         level,
         status,
         isFree,
+        topic,
+        headerImageUrl,
         publishedAt: status === "published" ? new Date() : null,
         estimatedMinutes: Math.max(1, Math.ceil(input.body.length / 80)),
         wordCount: 0,

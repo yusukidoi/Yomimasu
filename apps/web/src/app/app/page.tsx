@@ -1,4 +1,5 @@
 import {
+  countUserAiUsage,
   countUserVocabulary,
   ensureProfile,
   getProgressSummary,
@@ -23,7 +24,7 @@ export default async function DashboardPage() {
   }
 
   const db = getDb();
-  await ensureProfile(db, {
+  const profile = await ensureProfile(db, {
     id: user.id,
     email: user.email,
   });
@@ -31,6 +32,7 @@ export default async function DashboardPage() {
   const vocabulary = await listUserVocabulary(db, user.id, 8);
   const counts = await countUserVocabulary(db, user.id);
   const progress = await getProgressSummary(db, user.id);
+  const aiUsage = await countUserAiUsage(db, user.id);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-16">
@@ -44,6 +46,7 @@ export default async function DashboardPage() {
           </h1>
           <p className="mt-4 text-ink-muted">
             Live from reading sessions and saved vocabulary.
+            {profile.accountRole === "premium" ? " Premium account." : " Free account."}
           </p>
         </div>
         <form action="/auth/signout" method="post">
@@ -56,7 +59,7 @@ export default async function DashboardPage() {
         </form>
       </div>
 
-      <section className="mt-10 grid gap-4 sm:grid-cols-3">
+      <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-2xl border border-line bg-white/80 p-5">
           <p className="text-sm text-ink-muted">Saved words</p>
           <p className="mt-2 text-3xl font-semibold text-ink">{counts.saved}</p>
@@ -69,6 +72,25 @@ export default async function DashboardPage() {
           <p className="text-sm text-ink-muted">Reading streak</p>
           <p className="mt-2 text-3xl font-semibold text-ink">
             {progress.streakDays} days
+          </p>
+        </div>
+        <div className="rounded-2xl border border-line bg-white/80 p-5">
+          <p className="text-sm text-ink-muted">Texts started</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">
+            {progress.textsStarted}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-line bg-white/80 p-5">
+          <p className="text-sm text-ink-muted">Texts completed</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">
+            {progress.textsCompleted}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-line bg-white/80 p-5">
+          <p className="text-sm text-ink-muted">AI explain requests</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">{aiUsage.total}</p>
+          <p className="mt-1 text-xs text-ink-muted">
+            {aiUsage.fresh} fresh · {aiUsage.cached} cached
           </p>
         </div>
       </section>
@@ -106,10 +128,10 @@ export default async function DashboardPage() {
 
       <div className="mt-8 flex flex-wrap gap-3 text-sm">
         <Link
-          href="/read/n4-spring-picnic"
+          href="/library"
           className="rounded-full bg-sakura-deep px-5 py-2.5 font-medium text-white transition hover:bg-[#b34d58]"
         >
-          Try Spring Picnic
+          Open library
         </Link>
         <Link
           href="/read/n5-morning-routine"

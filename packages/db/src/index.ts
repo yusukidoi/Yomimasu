@@ -4,6 +4,8 @@ export {
   ensureProfile,
   getProfileById,
   setProfileAdmin,
+  setProfileAccountRole,
+  canAccessPremiumContent,
   type EnsureProfileInput,
 } from "./profiles";
 export { listAllTexts } from "./admin";
@@ -30,6 +32,10 @@ export {
   findCachedExplanation,
   storeExplanation,
 } from "./ai-explanations";
+export {
+  countUserAiUsage,
+  recordAiUsageEvent,
+} from "./ai-usage";
 export {
   getProgressSummary,
   recordReadingHeartbeat,

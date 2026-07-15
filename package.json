@@ -14,7 +14,8 @@
     "db:seed": "pnpm --filter @yomimasu/db db:seed",
     "db:seed-dictionary": "pnpm --filter @yomimasu/db db:seed-dictionary",
     "db:process": "pnpm --filter @yomimasu/db db:process",
-    "admin:grant": "pnpm --filter @yomimasu/db admin:grant"
+    "admin:grant": "pnpm --filter @yomimasu/db admin:grant",
+    "role:set": "pnpm --filter @yomimasu/db role:set"
   },
   "devDependencies": {
     "turbo": "^2.5.4",

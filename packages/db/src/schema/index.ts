@@ -33,6 +33,8 @@ export const tokenKindEnum = pgEnum("token_kind", [
   "other",
 ]);
 
+export const accountRoleEnum = pgEnum("account_role", ["free", "premium"]);
+
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -51,6 +53,7 @@ export const profiles = pgTable("profiles", {
   email: varchar("email", { length: 320 }),
   displayName: varchar("display_name", { length: 120 }),
   jlptLevel: jlptLevelEnum("jlpt_level").notNull().default("N5"),
+  accountRole: accountRoleEnum("account_role").notNull().default("free"),
   isAdmin: boolean("is_admin").notNull().default(false),
   readingStreakDays: integer("reading_streak_days").notNull().default(0),
   lastReadAt: timestamp("last_read_at", { withTimezone: true }),
@@ -69,6 +72,7 @@ export const texts = pgTable(
     summary: text("summary"),
     body: text("body").notNull(),
     translationEn: text("translation_en"),
+    headerImageUrl: varchar("header_image_url", { length: 500 }),
     status: textStatusEnum("status").notNull().default("draft"),
     isFree: boolean("is_free").notNull().default(false),
     estimatedMinutes: integer("estimated_minutes").notNull().default(5),
@@ -241,3 +245,17 @@ export const aiExplanations = pgTable(
     ),
   ],
 );
+
+export const aiUsageEvents = pgTable("ai_usage_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  textId: uuid("text_id").references(() => texts.id, { onDelete: "set null" }),
+  sentenceId: uuid("sentence_id").references(() => textSentences.id, {
+    onDelete: "set null",
+  }),
+  cached: boolean("cached").notNull().default(false),
+  model: varchar("model", { length: 80 }),
+  ...timestamps,
+});

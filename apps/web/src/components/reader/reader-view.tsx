@@ -120,6 +120,13 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
     )
       ? selectedToken?.surface
       : null;
+    const sentenceIndex = text.sentences.findIndex((row) => row.id === sentence.id);
+    const previousSentence =
+      sentenceIndex > 0 ? text.sentences[sentenceIndex - 1]?.surface : null;
+    const nextSentence =
+      sentenceIndex >= 0 && sentenceIndex < text.sentences.length - 1
+        ? text.sentences[sentenceIndex + 1]?.surface
+        : null;
 
     setExplainingId(sentence.id);
     try {
@@ -131,6 +138,8 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
           sentenceId: sentence.id,
           sentenceSurface: sentence.surface,
           selectedTokenSurface: focusInSentence,
+          previousSentence,
+          nextSentence,
           userLevel: text.level,
         }),
       });
@@ -164,6 +173,16 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 pb-12 pt-4">
+      {text.headerImageUrl ? (
+        <div className="mb-6 overflow-hidden rounded-2xl border border-line">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={text.headerImageUrl}
+            alt=""
+            className="max-h-64 w-full object-cover"
+          />
+        </div>
+      ) : null}
       <header className="border-b border-line pb-6">
         <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
           <span className="rounded-full bg-sakura-deep/10 px-3 py-1 font-medium text-sakura-deep">

@@ -28,6 +28,9 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
   const [slug, setSlug] = useState("live-demo");
   const [level, setLevel] = useState<"N5" | "N4" | "N3">("N5");
   const [status, setStatus] = useState<"draft" | "published">("published");
+  const [topic, setTopic] = useState("Daily life");
+  const [isFree, setIsFree] = useState(true);
+  const [headerImageUrl, setHeaderImageUrl] = useState("");
   const [body, setBody] = useState(
     "今日は学校に行きました。友達と一緒に昼ご飯を食べました。",
   );
@@ -73,7 +76,16 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
           className="mt-6 space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
-            runProcess({ title, slug, level, body, status });
+            runProcess({
+              title,
+              slug,
+              level,
+              body,
+              status,
+              topic,
+              isFree,
+              headerImageUrl: headerImageUrl.trim() || null,
+            });
           }}
         >
           <div className="grid gap-4 sm:grid-cols-2">
@@ -126,6 +138,37 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
               </select>
             </label>
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm">
+              <span className="text-ink-muted">Topic / category</span>
+              <input
+                value={topic}
+                onChange={(event) => setTopic(event.target.value)}
+                className="mt-1 w-full rounded-xl border border-line bg-paper/60 px-3 py-2 text-ink outline-none focus:border-sakura-deep"
+                placeholder="Daily life"
+              />
+            </label>
+            <label className="flex items-end gap-2 pb-2 text-sm">
+              <input
+                type="checkbox"
+                checked={isFree}
+                onChange={(event) => setIsFree(event.target.checked)}
+                className="h-4 w-4 rounded border-line text-sakura-deep focus:ring-sakura-deep"
+              />
+              <span className="text-ink-muted">Free for all users</span>
+            </label>
+          </div>
+
+          <label className="block text-sm">
+            <span className="text-ink-muted">Header image URL (optional)</span>
+            <input
+              value={headerImageUrl}
+              onChange={(event) => setHeaderImageUrl(event.target.value)}
+              className="mt-1 w-full rounded-xl border border-line bg-paper/60 px-3 py-2 text-ink outline-none focus:border-sakura-deep"
+              placeholder="/texts/text-morning-routine.png or https://..."
+            />
+          </label>
 
           <label className="block text-sm">
             <span className="text-ink-muted">Japanese body</span>

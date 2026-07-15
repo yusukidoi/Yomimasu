@@ -1,6 +1,7 @@
 import { listAllTexts } from "@yomimasu/db";
 import Link from "next/link";
 import { ProcessTextForm } from "@/components/admin/process-text-form";
+import { TextStatusControls } from "@/components/admin/text-status-controls";
 import { getDb } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 
@@ -62,18 +63,28 @@ export default async function AdminPage() {
                   <p className="text-xs text-ink-muted">{text.slug}</p>
                 </td>
                 <td className="px-4 py-3 text-ink">{text.level}</td>
-                <td className="px-4 py-3 capitalize text-ink-muted">
-                  {text.status}
+                <td className="px-4 py-3">
+                  <p className="capitalize text-ink-muted">{text.status}</p>
+                  <div className="mt-1">
+                    <TextStatusControls
+                      slug={text.slug}
+                      status={text.status}
+                    />
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-ink-muted">
                   {text.isFree ? "Yes" : "No"}
                 </td>
                 <td className="space-x-3 px-4 py-3">
                   <Link
-                    href={`/read/${text.slug}`}
+                    href={
+                      text.status === "published"
+                        ? `/read/${text.slug}`
+                        : `/read/${text.slug}?preview=1`
+                    }
                     className="font-medium text-sakura-deep hover:underline"
                   >
-                    Reader
+                    {text.status === "published" ? "Reader" : "Preview"}
                   </Link>
                   <Link
                     href={`/admin/texts/${text.slug}/tokens`}
@@ -92,8 +103,12 @@ export default async function AdminPage() {
         To grant admin access, run{" "}
         <code className="rounded bg-paper px-1.5 py-0.5">
           pnpm admin:grant your@email.com
-        </code>{" "}
-        after signing up once.
+        </code>
+        . For premium library access:{" "}
+        <code className="rounded bg-paper px-1.5 py-0.5">
+          pnpm role:set your@email.com premium
+        </code>
+        .
       </p>
     </main>
   );

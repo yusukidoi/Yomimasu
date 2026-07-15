@@ -9,6 +9,8 @@ export type ProgressSummary = {
   readingTime: string;
   readingTimeSeconds: number;
   streakDays: number;
+  textsStarted: number;
+  textsCompleted: number;
   level: {
     current: "N5" | "N4" | "N3";
     next: "N5" | "N4" | "N3";
@@ -163,6 +165,10 @@ export async function getProgressSummary(
     (sum, session) => sum + session.secondsRead,
     0,
   );
+  const textsStarted = new Set(sessions.map((session) => session.textId)).size;
+  const textsCompleted = new Set(
+    sessions.filter((session) => session.completed).map((session) => session.textId),
+  ).size;
 
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 6);
@@ -209,6 +215,8 @@ export async function getProgressSummary(
     readingTime: formatReadingTime(readingTimeSeconds),
     readingTimeSeconds,
     streakDays: profile?.readingStreakDays ?? 0,
+    textsStarted,
+    textsCompleted,
     level: {
       current: level,
       next: nextLevel(level),

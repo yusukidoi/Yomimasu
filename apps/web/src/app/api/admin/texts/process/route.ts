@@ -12,6 +12,9 @@ type ProcessBody = {
   body?: string;
   level?: "N5" | "N4" | "N3";
   status?: "draft" | "published";
+  topic?: string | null;
+  isFree?: boolean;
+  headerImageUrl?: string | null;
   reprocessExisting?: boolean;
 };
 
@@ -73,7 +76,9 @@ export async function POST(request: Request) {
       title,
       body,
       level: input.level ?? "N5",
-      isFree: true,
+      isFree: input.isFree ?? true,
+      topic: input.topic,
+      headerImageUrl: input.headerImageUrl,
       status: input.status ?? "published",
     });
 
