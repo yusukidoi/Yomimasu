@@ -8,6 +8,11 @@ export {
 } from "./profiles";
 export { listAllTexts } from "./admin";
 export {
+  seedDictionaryEntries,
+  findDictionaryMatch,
+  type DictionaryMatch,
+} from "./dictionary";
+export {
   processAndStoreTextTokens,
   processTextBySlug,
   upsertAndProcessText,
@@ -16,5 +21,9 @@ export {
   type UpsertAndProcessTextResult,
 } from "./process-text";
 export { getTextBySlug, getTextForReader, listPublishedTexts } from "./texts";
-export { listUserVocabulary, saveUserVocabulary, type SaveVocabularyInput } from "./vocabulary";
+export {
+  listUserVocabulary,
+  saveUserVocabulary,
+  type SaveVocabularyInput,
+} from "./vocabulary";
 export { SAMPLE_TEXTS, type SampleTextSeed } from "./seed/sample-texts";

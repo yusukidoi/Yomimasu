@@ -1,6 +1,7 @@
 import { processJapaneseText } from "@yomimasu/japanese";
 import { eq } from "drizzle-orm";
 import type { Database } from "./client";
+import { findDictionaryMatch } from "./dictionary";
 import { lookupTokenMeaning } from "./meanings/lookup";
 import { textSentences, texts, textTokens } from "./schema";
 
@@ -12,7 +13,7 @@ export type ProcessTextResult = {
 
 /**
  * Run Kuromoji on a text body and replace stored sentences/tokens in Postgres.
- * This is the Milestone 1 persistence path (not frontend-only state).
+ * Meanings resolve from dictionary_entries (JMDict-style seed) then local maps.
  */
 export async function processAndStoreTextTokens(
   db: Database,
@@ -36,8 +37,14 @@ export async function processAndStoreTextTokens(
 
     if (sentence.tokens.length === 0) continue;
 
-    await db.insert(textTokens).values(
-      sentence.tokens.map((token) => ({
+    const tokenRows = [];
+    for (const token of sentence.tokens) {
+      const dictMatch =
+        token.kind === "punctuation"
+          ? null
+          : await findDictionaryMatch(db, token.lemma, token.surface);
+
+      tokenRows.push({
         textId,
         sentenceId: savedSentence.id,
         index: token.index,
@@ -48,10 +55,14 @@ export async function processAndStoreTextTokens(
         kind: token.kind,
         meaning:
           token.meaning ??
+          dictMatch?.primaryMeaning ??
           lookupTokenMeaning(token.surface, token.lemma, token.kind),
+        dictionaryEntryId: dictMatch?.id ?? null,
         grammarForm: token.grammarForm,
-      })),
-    );
+      });
+    }
+
+    await db.insert(textTokens).values(tokenRows);
   }
 
   await db
@@ -100,7 +111,6 @@ export type UpsertAndProcessTextResult = ProcessTextResult & {
 
 /**
  * Create or update a text row, then tokenize with Kuromoji into Postgres.
- * Used by admin API / CLI for live Milestone 1 demos.
  */
 export async function upsertAndProcessText(
   db: Database,

@@ -13,6 +13,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/seed/seed.ts",
+    "db:seed-dictionary": "tsx src/seed/seed-dictionary.ts",
     "db:process": "tsx src/seed/process-text-cli.ts",
     "admin:grant": "tsx src/seed/grant-admin.ts",
     "typecheck": "tsc --noEmit"

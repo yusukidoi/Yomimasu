@@ -1,6 +1,6 @@
 # @yomimasu/japanese
 
-Japanese text processing for Yomimasu Milestone 1.
+Japanese text processing for Yomimasu.
 
 ## What this package does
 
@@ -9,17 +9,22 @@ Japanese text processing for Yomimasu Milestone 1.
 - Returns normalized fields for DB storage:
   - surface, reading (hiragana, kanji-only furigana), lemma, POS, kind, grammar form
 
-## What it does **not** do yet
+## Related (in `@yomimasu/db`, not this package)
 
-- English dictionary meanings (JMdict) — Milestone 2+
-- Admin correction of bad splits — Milestone 3
-- Persistence — handled by `@yomimasu/db` (`processAndStoreTextTokens` / `upsertAndProcessText`)
+- English dictionary meanings via `dictionary_entries` (JMDict-style seed) + process-time lookup
+- Persistence: `processAndStoreTextTokens` / `upsertAndProcessText`
 
 ## Demo
 
 ```bash
 pnpm --filter @yomimasu/japanese tokenize:demo
 pnpm --filter @yomimasu/japanese tokenize:demo -- "今日もいい一日です。"
+```
+
+Seed dictionary meanings (DB):
+
+```bash
+pnpm db:seed-dictionary
 ```
 
 See also: [`docs/milestone-1-technical-note.md`](../../docs/milestone-1-technical-note.md).
