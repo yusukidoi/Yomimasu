@@ -1,7 +1,4 @@
-import {
-  processTextBySlug,
-  upsertAndProcessText,
-} from "@yomimasu/db";
+import { processTextBySlug, upsertAndProcessText } from "@yomimasu/db";
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getSessionProfile } from "@/lib/auth";
@@ -14,6 +11,7 @@ type ProcessBody = {
   title?: string;
   body?: string;
   level?: "N5" | "N4" | "N3";
+  status?: "draft" | "published";
   reprocessExisting?: boolean;
 };
 
@@ -48,6 +46,7 @@ export async function POST(request: Request) {
         sentenceCount: result.sentenceCount,
         tokenCount: result.tokenCount,
         readerPath: `/read/${input.slug}`,
+        tokensPath: `/admin/texts/${input.slug}/tokens`,
       });
     } catch (error) {
       const message =
@@ -75,6 +74,7 @@ export async function POST(request: Request) {
       body,
       level: input.level ?? "N5",
       isFree: true,
+      status: input.status ?? "published",
     });
 
     return NextResponse.json({
@@ -82,9 +82,11 @@ export async function POST(request: Request) {
       slug: result.slug,
       textId: result.textId,
       created: result.created,
+      status: result.status,
       sentenceCount: result.sentenceCount,
       tokenCount: result.tokenCount,
       readerPath: `/read/${result.slug}`,
+      tokensPath: `/admin/texts/${result.slug}/tokens`,
     });
   } catch (error) {
     const message =

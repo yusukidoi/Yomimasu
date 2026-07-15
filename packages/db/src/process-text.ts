@@ -101,12 +101,14 @@ export type UpsertAndProcessTextInput = {
   body: string;
   level?: "N5" | "N4" | "N3";
   isFree?: boolean;
+  status?: "draft" | "published";
 };
 
 export type UpsertAndProcessTextResult = ProcessTextResult & {
   slug: string;
   title: string;
   created: boolean;
+  status: "draft" | "published";
 };
 
 /**
@@ -118,6 +120,7 @@ export async function upsertAndProcessText(
 ): Promise<UpsertAndProcessTextResult> {
   const level = input.level ?? "N5";
   const isFree = input.isFree ?? true;
+  const status = input.status ?? "published";
   const existing = await db.query.texts.findFirst({
     where: eq(texts.slug, input.slug),
   });
@@ -132,10 +135,13 @@ export async function upsertAndProcessText(
         title: input.title,
         body: input.body,
         level,
-        status: "published",
+        status,
         isFree,
         updatedAt: new Date(),
-        publishedAt: existing.publishedAt ?? new Date(),
+        publishedAt:
+          status === "published"
+            ? (existing.publishedAt ?? new Date())
+            : existing.publishedAt,
         estimatedMinutes: Math.max(1, Math.ceil(input.body.length / 80)),
       })
       .where(eq(texts.id, existing.id))
@@ -149,9 +155,9 @@ export async function upsertAndProcessText(
         title: input.title,
         body: input.body,
         level,
-        status: "published",
+        status,
         isFree,
-        publishedAt: new Date(),
+        publishedAt: status === "published" ? new Date() : null,
         estimatedMinutes: Math.max(1, Math.ceil(input.body.length / 80)),
         wordCount: 0,
       })
@@ -167,5 +173,6 @@ export async function upsertAndProcessText(
     slug: input.slug,
     title: input.title,
     created,
+    status,
   };
 }

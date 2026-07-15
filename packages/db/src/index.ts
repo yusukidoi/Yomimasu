@@ -8,6 +8,12 @@ export {
 } from "./profiles";
 export { listAllTexts } from "./admin";
 export {
+  listTokensForTextSlug,
+  updateTextToken,
+  setTextPublishStatus,
+  type UpdateTokenInput,
+} from "./admin-tokens";
+export {
   seedDictionaryEntries,
   findDictionaryMatch,
   type DictionaryMatch,

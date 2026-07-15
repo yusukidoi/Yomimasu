@@ -10,6 +10,8 @@ type ProcessResult = {
   sentenceCount: number;
   tokenCount: number;
   readerPath: string;
+  tokensPath?: string;
+  status?: string;
   created?: boolean;
 };
 
@@ -25,6 +27,7 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
   const [title, setTitle] = useState("Live demo");
   const [slug, setSlug] = useState("live-demo");
   const [level, setLevel] = useState<"N5" | "N4" | "N3">("N5");
+  const [status, setStatus] = useState<"draft" | "published">("published");
   const [body, setBody] = useState(
     "今日は学校に行きました。友達と一緒に昼ご飯を食べました。",
   );
@@ -62,16 +65,15 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
           Process Japanese text
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">
-          Paste Japanese, run Kuromoji on the server, store sentences/tokens in
-          Postgres, then open the reader. Meanings may be empty until dictionary
-          enrichment (Milestone 3).
+          Paste Japanese, tokenize with Kuromoji, match dictionary meanings,
+          then save as draft or publish. Edit tokens after processing.
         </p>
 
         <form
           className="mt-6 space-y-4"
           onSubmit={(event) => {
             event.preventDefault();
-            runProcess({ title, slug, level, body });
+            runProcess({ title, slug, level, body, status });
           }}
         >
           <div className="grid gap-4 sm:grid-cols-2">
@@ -95,20 +97,35 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
             </label>
           </div>
 
-          <label className="block text-sm">
-            <span className="text-ink-muted">Level</span>
-            <select
-              value={level}
-              onChange={(event) =>
-                setLevel(event.target.value as "N5" | "N4" | "N3")
-              }
-              className="mt-1 w-full max-w-xs rounded-xl border border-line bg-paper/60 px-3 py-2 text-ink outline-none focus:border-sakura-deep"
-            >
-              <option value="N5">N5</option>
-              <option value="N4">N4</option>
-              <option value="N3">N3</option>
-            </select>
-          </label>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm">
+              <span className="text-ink-muted">Level</span>
+              <select
+                value={level}
+                onChange={(event) =>
+                  setLevel(event.target.value as "N5" | "N4" | "N3")
+                }
+                className="mt-1 w-full rounded-xl border border-line bg-paper/60 px-3 py-2 text-ink outline-none focus:border-sakura-deep"
+              >
+                <option value="N5">N5</option>
+                <option value="N4">N4</option>
+                <option value="N3">N3</option>
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="text-ink-muted">Publish status</span>
+              <select
+                value={status}
+                onChange={(event) =>
+                  setStatus(event.target.value as "draft" | "published")
+                }
+                className="mt-1 w-full rounded-xl border border-line bg-paper/60 px-3 py-2 text-ink outline-none focus:border-sakura-deep"
+              >
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </label>
+          </div>
 
           <label className="block text-sm">
             <span className="text-ink-muted">Japanese body</span>
@@ -126,7 +143,11 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
             disabled={isPending}
             className="rounded-full bg-sakura-deep px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
           >
-            {isPending ? "Processing…" : "Tokenize & publish"}
+            {isPending
+              ? "Processing…"
+              : status === "draft"
+                ? "Tokenize as draft"
+                : "Tokenize & publish"}
           </button>
         </form>
       </div>
@@ -137,7 +158,7 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
             Reprocess existing text
           </h3>
           <p className="mt-1 text-sm text-ink-muted">
-            Re-run Kuromoji on a text already stored in the database.
+            Re-run Kuromoji + dictionary matching, or open the token editor.
           </p>
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <label className="block text-sm">
@@ -167,6 +188,14 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
             >
               {isPending ? "Processing…" : "Reprocess"}
             </button>
+            {reprocessSlug ? (
+              <Link
+                href={`/admin/texts/${reprocessSlug}/tokens`}
+                className="rounded-full border border-line px-5 py-2.5 text-sm font-medium text-sakura-deep"
+              >
+                Edit tokens
+              </Link>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -186,14 +215,24 @@ export function ProcessTextForm({ existingSlugs }: ProcessTextFormProps) {
             <code className="rounded bg-white/70 px-1.5 py-0.5">
               {result.slug}
             </code>
-            .
+            {result.status ? ` (${result.status})` : ""}.
           </p>
-          <Link
-            href={result.readerPath}
-            className="mt-2 inline-block font-medium text-sakura-deep hover:underline"
-          >
-            Open reader →
-          </Link>
+          <div className="mt-2 flex flex-wrap gap-4">
+            <Link
+              href={result.readerPath}
+              className="font-medium text-sakura-deep hover:underline"
+            >
+              Open reader →
+            </Link>
+            {result.tokensPath ? (
+              <Link
+                href={result.tokensPath}
+                className="font-medium text-sakura-deep hover:underline"
+              >
+                Correct tokens →
+              </Link>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </section>

@@ -21,7 +21,7 @@ export default async function AdminPage() {
             Content
           </h1>
           <p className="mt-4 text-ink-muted">
-            Process Japanese with Kuromoji into Postgres, then open the reader.
+            Process Japanese, choose draft or published, then correct tokens.
           </p>
         </div>
         <Link
@@ -37,7 +37,7 @@ export default async function AdminPage() {
           Texts
         </span>
         <span className="rounded-full border border-line px-4 py-2 text-ink-muted">
-          Tokens (soon)
+          Tokens → open from a row
         </span>
       </nav>
 
@@ -68,12 +68,18 @@ export default async function AdminPage() {
                 <td className="px-4 py-3 text-ink-muted">
                   {text.isFree ? "Yes" : "No"}
                 </td>
-                <td className="px-4 py-3">
+                <td className="space-x-3 px-4 py-3">
                   <Link
                     href={`/read/${text.slug}`}
                     className="font-medium text-sakura-deep hover:underline"
                   >
-                    Open reader
+                    Reader
+                  </Link>
+                  <Link
+                    href={`/admin/texts/${text.slug}/tokens`}
+                    className="font-medium text-ink hover:underline"
+                  >
+                    Tokens
                   </Link>
                 </td>
               </tr>
