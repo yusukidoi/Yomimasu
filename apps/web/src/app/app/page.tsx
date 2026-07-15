@@ -1,6 +1,12 @@
-import { ensureProfile, listUserVocabulary } from "@yomimasu/db";
+import {
+  countUserVocabulary,
+  ensureProfile,
+  getProgressSummary,
+  listUserVocabulary,
+} from "@yomimasu/db";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LandingProgressPreview } from "@/components/landing/landing-progress-preview";
 import { getDb } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,17 +23,17 @@ export default async function DashboardPage() {
   }
 
   const db = getDb();
-  const profile = await ensureProfile(db, {
+  await ensureProfile(db, {
     id: user.id,
     email: user.email,
   });
 
   const vocabulary = await listUserVocabulary(db, user.id, 8);
-  const savedCount = vocabulary.filter((item) => item.status === "saved").length;
-  const knownCount = vocabulary.filter((item) => item.status === "known").length;
+  const counts = await countUserVocabulary(db, user.id);
+  const progress = await getProgressSummary(db, user.id);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-6 py-16">
+    <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-16">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.18em] text-sakura-deep">
@@ -37,7 +43,7 @@ export default async function DashboardPage() {
             Your progress
           </h1>
           <p className="mt-4 text-ink-muted">
-            Save words while reading, then review them here.
+            Live from reading sessions and saved vocabulary.
           </p>
         </div>
         <form action="/auth/signout" method="post">
@@ -53,21 +59,23 @@ export default async function DashboardPage() {
       <section className="mt-10 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-line bg-white/80 p-5">
           <p className="text-sm text-ink-muted">Saved words</p>
-          <p className="mt-2 text-3xl font-semibold text-ink">{savedCount}</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">{counts.saved}</p>
         </div>
         <div className="rounded-2xl border border-line bg-white/80 p-5">
           <p className="text-sm text-ink-muted">Known words</p>
-          <p className="mt-2 text-3xl font-semibold text-ink">{knownCount}</p>
+          <p className="mt-2 text-3xl font-semibold text-ink">{counts.known}</p>
         </div>
         <div className="rounded-2xl border border-line bg-white/80 p-5">
           <p className="text-sm text-ink-muted">Reading streak</p>
           <p className="mt-2 text-3xl font-semibold text-ink">
-            {profile.readingStreakDays} days
+            {progress.streakDays} days
           </p>
         </div>
       </section>
 
-      <section className="mt-8 rounded-2xl border border-line bg-white/80 p-5">
+      <LandingProgressPreview progress={progress} isLive />
+
+      <section className="mt-10 rounded-2xl border border-line bg-white/80 p-5">
         <h2 className="text-sm font-medium text-ink">Recent vocabulary</h2>
         {vocabulary.length === 0 ? (
           <p className="mt-4 text-sm text-ink-muted">
@@ -76,7 +84,10 @@ export default async function DashboardPage() {
         ) : (
           <ul className="mt-4 divide-y divide-line">
             {vocabulary.map((item) => (
-              <li key={item.id} className="flex items-center justify-between py-3 text-sm">
+              <li
+                key={item.id}
+                className="flex items-center justify-between py-3 text-sm"
+              >
                 <div>
                   <p className="font-medium text-ink">{item.surface}</p>
                   <p className="text-ink-muted">

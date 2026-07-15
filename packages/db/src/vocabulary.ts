@@ -64,3 +64,16 @@ export async function listUserVocabulary(db: Database, userId: string, limit = 8
     limit,
   });
 }
+
+export async function countUserVocabulary(db: Database, userId: string) {
+  const rows = await db.query.userVocabulary.findMany({
+    where: eq(userVocabulary.userId, userId),
+    columns: { status: true },
+  });
+  return {
+    total: rows.length,
+    saved: rows.filter((row) => row.status === "saved").length,
+    known: rows.filter((row) => row.status === "known").length,
+    read: rows.filter((row) => row.status === "read").length,
+  };
+}

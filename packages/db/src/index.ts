@@ -26,8 +26,14 @@ export {
   type UpsertAndProcessTextInput,
   type UpsertAndProcessTextResult,
 } from "./process-text";
+export {
+  getProgressSummary,
+  recordReadingHeartbeat,
+  type ProgressSummary,
+} from "./progress";
 export { getTextBySlug, getTextForReader, listPublishedTexts } from "./texts";
 export {
+  countUserVocabulary,
   listUserVocabulary,
   saveUserVocabulary,
   type SaveVocabularyInput,

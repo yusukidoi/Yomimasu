@@ -3,17 +3,8 @@
 import Link from "next/link";
 
 /**
- * Landing progress preview — UI only with demo numbers.
- *
- * Chart data plan (next steps):
- * 1. Add `GET /api/progress/summary` returning:
- *    - knownWords, newWords, readingTimeSeconds, streakDays
- *    - levelProgress: { current, next, percent }
- *    - weeklyReading: [{ day, percent }] from reading_sessions
- *    - vocabularyStatus: { known, new, review } from user_vocabulary
- * 2. Replace DEMO_PROGRESS below with that API response (or server props).
- * 3. Optionally swap SVG charts for Recharts once live data is wired.
- * 4. Anonymous visitors keep this demo preview; logged-in users see real stats.
+ * Progress charts: demo numbers for guests; live `progress`/`isLive` from
+ * reading_sessions + user_vocabulary when the user is logged in.
  */
 export const DEMO_PROGRESS = {
   knownWords: 423,
@@ -168,8 +159,38 @@ function VocabularyDonut({
   );
 }
 
-export function LandingProgressPreview() {
-  const data = DEMO_PROGRESS;
+export type ProgressChartData = {
+  knownWords: number;
+  newWords: number;
+  readingTime: string;
+  streakDays: number;
+  level: {
+    current: string;
+    next: string;
+    goal: string;
+    percent: number;
+  };
+  weeklyReading: ReadonlyArray<{ day: string; percent: number }>;
+  vocabulary: {
+    known: number;
+    knownPercent: number;
+    new: number;
+    newPercent: number;
+    review: number;
+    reviewPercent: number;
+  };
+};
+
+type LandingProgressPreviewProps = {
+  progress?: ProgressChartData | null;
+  isLive?: boolean;
+};
+
+export function LandingProgressPreview({
+  progress,
+  isLive = false,
+}: LandingProgressPreviewProps) {
+  const data = progress ?? DEMO_PROGRESS;
 
   return (
     <section id="progress" className="mt-24">
@@ -178,7 +199,11 @@ export function LandingProgressPreview() {
           <h2 className="font-display text-3xl font-semibold text-ink md:text-4xl">
             See your Japanese level grow.
           </h2>
-          <p className="mt-2 text-ink-muted">Stay motivated with clear insights.</p>
+          <p className="mt-2 text-ink-muted">
+            {isLive
+              ? "Live from your reading sessions and vocabulary."
+              : "Stay motivated with clear insights."}
+          </p>
         </div>
         <Link
           href="/app"
@@ -305,7 +330,9 @@ export function LandingProgressPreview() {
               </ul>
             </div>
             <p className="mt-6 text-xs text-ink-muted">
-              Preview UI — live charts will use reading_sessions + user_vocabulary.
+              {isLive
+                ? "Synced from reading_sessions + user_vocabulary."
+                : "Demo preview — log in and read to see your real stats."}
             </p>
           </div>
         </div>

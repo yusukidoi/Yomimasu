@@ -1,4 +1,8 @@
-import { listPublishedTexts, SAMPLE_TEXTS } from "@yomimasu/db";
+import {
+  getProgressSummary,
+  listPublishedTexts,
+  SAMPLE_TEXTS,
+} from "@yomimasu/db";
 import { LandingCategories } from "@/components/landing/landing-categories";
 import { LandingCta } from "@/components/landing/landing-cta";
 import { LandingFeatures } from "@/components/landing/landing-features";
@@ -7,6 +11,7 @@ import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingProgressPreview } from "@/components/landing/landing-progress-preview";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getSessionProfile } from "@/lib/auth";
 import { tryGetDb } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +60,17 @@ export default async function Home() {
     ? `/read/${freeTexts[0].slug}`
     : "/read/n5-morning-routine";
 
+  const { user } = await getSessionProfile();
+  const db = tryGetDb();
+  let liveProgress = null;
+  if (user && db) {
+    try {
+      liveProgress = await getProgressSummary(db, user.id);
+    } catch {
+      liveProgress = null;
+    }
+  }
+
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
       <div
@@ -76,7 +92,10 @@ export default async function Home() {
         <LandingFreeTexts texts={freeTexts} />
 
         <LandingCategories />
-        <LandingProgressPreview />
+        <LandingProgressPreview
+          progress={liveProgress}
+          isLive={Boolean(liveProgress)}
+        />
         <LandingCta startReadingHref={startReadingHref} />
       </main>
 

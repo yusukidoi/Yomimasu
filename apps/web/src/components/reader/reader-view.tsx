@@ -2,7 +2,7 @@
 
 import type { ReaderText, ReaderToken } from "@yomimasu/shared";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TokenPopup } from "./token-popup";
 
 type ReaderViewProps = {
@@ -65,6 +65,38 @@ export function ReaderView({ text, isLoggedIn }: ReaderViewProps) {
     () => text.sentences.reduce((sum, sentence) => sum + sentence.tokens.length, 0),
     [text.sentences],
   );
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    function sendHeartbeat(secondsDelta: number, completed = false) {
+      void fetch("/api/progress/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          textId: text.id,
+          secondsDelta,
+          completed,
+        }),
+      });
+    }
+
+    sendHeartbeat(15);
+    const interval = window.setInterval(() => sendHeartbeat(30), 30_000);
+
+    function onVisibility() {
+      if (document.visibilityState === "hidden") {
+        sendHeartbeat(10);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+      sendHeartbeat(10);
+    };
+  }, [isLoggedIn, text.id]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 pb-12 pt-4">
